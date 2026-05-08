@@ -56,8 +56,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install --user zizmor==1.24.1
-          "$HOME/.local/bin/zizmor" --offline --min-severity low .github/workflows
+          pipx run --spec zizmor==1.24.1 zizmor --offline --min-severity low .github/workflows
       - name: Secret scan
         shell: bash
         env:

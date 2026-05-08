@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
   actions: read
 
 concurrency:
@@ -20,6 +19,10 @@ jobs:
   scorecard:
     if: github.repository == 'oaslananka-lab/boardguard'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
     timeout-minutes: 15
     continue-on-error: true
     steps:

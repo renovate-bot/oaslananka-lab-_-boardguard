@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
   actions: read
 
 concurrency:
@@ -21,6 +20,10 @@ jobs:
   analyze:
     if: github.repository == 'oaslananka-lab/boardguard' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
     timeout-minutes: 20
     strategy:
       fail-fast: false
