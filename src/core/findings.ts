@@ -1,6 +1,7 @@
 import type { SeverityName } from "./severities.js";
 
 export type RuleId =
+  | "BG-CONFIG-001"
   | "BG-PROJ-001"
   | "BG-PROJ-002"
   | "BG-PROJ-003"
@@ -38,6 +39,13 @@ export interface Finding {
 }
 
 export const ruleDefinitions: Record<RuleId, RuleDefinition> = {
+  "BG-CONFIG-001": {
+    id: "BG-CONFIG-001",
+    title: "BoardGuard configuration is invalid",
+    defaultSeverity: "high",
+    remediation: "Fix boardguard.yml so it matches the documented version 1 schema.",
+    maturity: "implemented"
+  },
   "BG-PROJ-001": {
     id: "BG-PROJ-001",
     title: "no KiCad project found",

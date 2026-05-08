@@ -52,6 +52,7 @@ function tokenize(input: string): string[] {
     }
     if (char === "\"") {
       let value = "";
+      let closed = false;
       i += 1;
       while (i < input.length) {
         const current = input[i];
@@ -62,10 +63,14 @@ function tokenize(input: string): string[] {
         }
         if (current === "\"") {
           i += 1;
+          closed = true;
           break;
         }
         value += current;
         i += 1;
+      }
+      if (!closed) {
+        throw new Error("unterminated quoted string");
       }
       tokens.push(value);
       continue;

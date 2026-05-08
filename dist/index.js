@@ -101395,6 +101395,13 @@ ${reportText}`.trim());
 
 // src/core/findings.ts
 var ruleDefinitions = {
+  "BG-CONFIG-001": {
+    id: "BG-CONFIG-001",
+    title: "BoardGuard configuration is invalid",
+    defaultSeverity: "high",
+    remediation: "Fix boardguard.yml so it matches the documented version 1 schema.",
+    maturity: "implemented"
+  },
   "BG-PROJ-001": {
     id: "BG-PROJ-001",
     title: "no KiCad project found",
@@ -101556,6 +101563,7 @@ function tokenize(input2) {
     }
     if (char === '"') {
       let value2 = "";
+      let closed = false;
       i += 1;
       while (i < input2.length) {
         const current = input2[i];
@@ -101566,10 +101574,14 @@ function tokenize(input2) {
         }
         if (current === '"') {
           i += 1;
+          closed = true;
           break;
         }
         value2 += current;
         i += 1;
+      }
+      if (!closed) {
+        throw new Error("unterminated quoted string");
       }
       tokens.push(value2);
       continue;
@@ -101652,8 +101664,7 @@ function balancedSlice(text, start) {
   let inString = false;
   for (let i = start; i < text.length; i += 1) {
     const char = text[i];
-    const previous = i > 0 ? text[i - 1] : "";
-    if (char === '"' && previous !== "\\") {
+    if (char === '"' && !isEscaped(text, i)) {
       inString = !inString;
     }
     if (inString) {
@@ -101670,6 +101681,13 @@ function balancedSlice(text, start) {
     }
   }
   return void 0;
+}
+function isEscaped(text, quoteIndex) {
+  let backslashes = 0;
+  for (let i = quoteIndex - 1; i >= 0 && text[i] === "\\"; i -= 1) {
+    backslashes += 1;
+  }
+  return backslashes % 2 === 1;
 }
 function lineForIndex(text, index) {
   return text.slice(0, index).split("\n").length;
@@ -102141,7 +102159,7 @@ async function analyze(input2) {
   const findings = [];
   for (const error2 of loadedConfig.errors) {
     findings.push(makeFinding({
-      ruleId: "BG-MFG-001",
+      ruleId: "BG-CONFIG-001",
       message: `BoardGuard configuration is invalid: ${error2}.`,
       locations: [{ path: loadedConfig.path ? normalizeRelative(scanRoot, loadedConfig.path) : "boardguard.yml", line: 1, column: 1 }]
     }));

@@ -79,8 +79,7 @@ function balancedSlice(text: string, start: number): string | undefined {
   let inString = false;
   for (let i = start; i < text.length; i += 1) {
     const char = text[i];
-    const previous = i > 0 ? text[i - 1] : "";
-    if (char === "\"" && previous !== "\\") {
+    if (char === "\"" && !isEscaped(text, i)) {
       inString = !inString;
     }
     if (inString) {
@@ -97,6 +96,14 @@ function balancedSlice(text: string, start: number): string | undefined {
     }
   }
   return undefined;
+}
+
+function isEscaped(text: string, quoteIndex: number): boolean {
+  let backslashes = 0;
+  for (let i = quoteIndex - 1; i >= 0 && text[i] === "\\"; i -= 1) {
+    backslashes += 1;
+  }
+  return backslashes % 2 === 1;
 }
 
 function lineForIndex(text: string, index: number): number {

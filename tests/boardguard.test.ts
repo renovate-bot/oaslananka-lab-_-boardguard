@@ -11,6 +11,7 @@ import { formatJson } from "../src/report/json.js";
 import { formatMarkdown } from "../src/report/markdown.js";
 import { formatSarif } from "../src/report/sarif.js";
 import { runCli } from "../src/cli/main.js";
+import { parseSExpression } from "../src/kicad/sexpr.js";
 
 const fixtureRoot = path.resolve("tests/fixtures/projects");
 const missingKicad = path.resolve("tests/fixtures/missing-tools/kicad-cli-not-installed");
@@ -45,6 +46,13 @@ describe("configuration and metadata", () => {
   it("validates boardguard.yml schema subset", () => {
     expect(validateConfig({ version: 1, rules: { "BG-PROJ-001": "error" } })).toEqual([]);
     expect(validateConfig({ version: 2 })).toContain("version must be 1");
+  });
+
+  it("reports invalid BoardGuard configuration with a dedicated rule", async () => {
+    const temp = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-config-"));
+    await fs.writeFile(path.join(temp, "boardguard.yml"), "version: 2\n", "utf8");
+    const report = await analyze(baseOptions(temp));
+    expect(report.findings.some((finding) => finding.ruleId === "BG-CONFIG-001")).toBe(true);
   });
 
   it("validates pinmap schema", () => {
@@ -94,6 +102,10 @@ describe("reports and CLI behavior", () => {
   it("fails enforce reports with high or critical findings", async () => {
     const report = await analyze({ ...baseOptions(path.join(fixtureRoot, "missing-board")), mode: "enforce" });
     expect(shouldFail(report)).toBe(true);
+  });
+
+  it("rejects unterminated S-expression strings", () => {
+    expect(() => parseSExpression("(kicad_sch (title \"unterminated))")).toThrow("unterminated quoted string");
   });
 });
 

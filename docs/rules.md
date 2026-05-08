@@ -2,6 +2,7 @@
 
 | Rule | Severity | Detection | Maturity |
 | --- | --- | --- | --- |
+| BG-CONFIG-001 | high | `boardguard.yml` is unreadable or does not match the version 1 schema subset. | implemented |
 | BG-PROJ-001 | high | No `.kicad_pro` found under the configured path. | implemented |
 | BG-PROJ-002 | medium | Multiple `.kicad_pro` files found without explicit project selection. | implemented |
 | BG-PROJ-003 | high | Associated schematic or board file is missing. | implemented |

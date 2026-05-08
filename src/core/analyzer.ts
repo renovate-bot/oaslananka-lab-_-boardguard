@@ -29,7 +29,7 @@ export async function analyze(input: AnalyzeOptions): Promise<BoardGuardReport> 
   const findings: Finding[] = [];
   for (const error of loadedConfig.errors) {
     findings.push(makeFinding({
-      ruleId: "BG-MFG-001",
+      ruleId: "BG-CONFIG-001",
       message: `BoardGuard configuration is invalid: ${error}.`,
       locations: [{ path: loadedConfig.path ? normalizeRelative(scanRoot, loadedConfig.path) : "boardguard.yml", line: 1, column: 1 }]
     }));
