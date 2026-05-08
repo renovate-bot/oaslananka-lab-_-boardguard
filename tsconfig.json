@@ -11,6 +11,7 @@
     "sourceMap": true,
     "noEmitOnError": true,
     "esModuleInterop": true,
+    "types": ["node"],
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
