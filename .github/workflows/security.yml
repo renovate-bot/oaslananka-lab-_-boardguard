@@ -34,17 +34,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          corepack enable
           corepack prepare pnpm@11.0.8 --activate
+          corepack pnpm --version
       - name: Install dependencies
         shell: bash
         run: |
           set -euo pipefail
-          pnpm install --frozen-lockfile
+          corepack pnpm install --frozen-lockfile
       - name: Dependency audit
         shell: bash
         run: |
           set -euo pipefail
-          pnpm audit --audit-level moderate
+          corepack pnpm audit --audit-level moderate
       - name: Workflow lint
         shell: bash
         run: |

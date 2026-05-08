@@ -34,18 +34,6 @@
   "maxSeverity": "high",
   "findings": [
     {
-      "ruleId": "BG-KICAD-001",
-      "title": "kicad-cli is unavailable",
-      "severity": "medium",
-      "message": "kicad-cli was not found, so KiCad-backed ERC and DRC checks were skipped.",
-      "remediation": "Install KiCad CLI or configure kicad-cli-path.",
-      "locations": [
-        {
-          "path": "."
-        }
-      ]
-    },
-    {
       "ruleId": "BG-PIN-001",
       "title": "firmware pinmap is inconsistent with declared hardware mapping",
       "severity": "high",
@@ -56,6 +44,18 @@
           "path": "firmware-pins.yml",
           "line": 1,
           "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-KICAD-001",
+      "title": "kicad-cli is unavailable",
+      "severity": "medium",
+      "message": "kicad-cli was not found, so KiCad-backed ERC and DRC checks were skipped.",
+      "remediation": "Install KiCad CLI or configure kicad-cli-path.",
+      "locations": [
+        {
+          "path": "."
         }
       ]
     }

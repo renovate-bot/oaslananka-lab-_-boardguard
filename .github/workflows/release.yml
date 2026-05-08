@@ -54,16 +54,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          corepack enable
           corepack prepare pnpm@11.0.8 --activate
-          pnpm install --frozen-lockfile
-          pnpm run build
-          pnpm run action:build
+          corepack pnpm install --frozen-lockfile
+          corepack pnpm run build
+          corepack pnpm run action:build
       - name: Build release artifacts
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p boardguard-results
-          pnpm pack --pack-destination boardguard-results
+          corepack pnpm pack --pack-destination boardguard-results
           node scripts/generate-sbom.mjs boardguard-results/sbom.cdx.json
           (cd boardguard-results && sha256sum * > SHA256SUMS)
       - name: Attest release artifacts

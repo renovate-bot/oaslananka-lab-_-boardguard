@@ -102210,7 +102210,7 @@ function countFindings(findings) {
   return counts;
 }
 function compareFindings2(a, b) {
-  return a.ruleId.localeCompare(b.ruleId) || a.severity.localeCompare(b.severity) || (a.locations[0]?.path ?? "").localeCompare(b.locations[0]?.path ?? "") || a.message.localeCompare(b.message);
+  return severityOrder[b.severity] - severityOrder[a.severity] || a.ruleId.localeCompare(b.ruleId) || (a.locations[0]?.path ?? "").localeCompare(b.locations[0]?.path ?? "") || a.message.localeCompare(b.message);
 }
 function normalizeLocationPath(root, value) {
   if (value === "." || value === "boardguard.yml") {
@@ -102254,7 +102254,7 @@ function formatMarkdown(report) {
 `;
 }
 function escapeCell(value) {
-  return value.replace(/\|/g, "\\|").replace(/\n/g, " ");
+  return value.replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\n/g, " ");
 }
 
 // src/report/summary.ts

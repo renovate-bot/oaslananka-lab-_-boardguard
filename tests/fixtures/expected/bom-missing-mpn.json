@@ -34,34 +34,6 @@
   "maxSeverity": "high",
   "findings": [
     {
-      "ruleId": "BG-BOM-001",
-      "title": "component is missing manufacturer part metadata",
-      "severity": "medium",
-      "message": "Component R1 is missing manufacturer or MPN metadata.",
-      "remediation": "Add manufacturer and manufacturer part number metadata.",
-      "locations": [
-        {
-          "path": "bom-missing-mpn.kicad_sch",
-          "line": 4,
-          "column": 1
-        }
-      ]
-    },
-    {
-      "ruleId": "BG-BOM-001",
-      "title": "component is missing manufacturer part metadata",
-      "severity": "medium",
-      "message": "Component R1 is missing manufacturer or MPN metadata.",
-      "remediation": "Add manufacturer and manufacturer part number metadata.",
-      "locations": [
-        {
-          "path": "bom.csv",
-          "line": 2,
-          "column": 1
-        }
-      ]
-    },
-    {
       "ruleId": "BG-BOM-002",
       "title": "duplicate component designator found",
       "severity": "high",
@@ -73,6 +45,34 @@
           "line": 4,
           "column": 1
         },
+        {
+          "path": "bom.csv",
+          "line": 2,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-BOM-001",
+      "title": "component is missing manufacturer part metadata",
+      "severity": "medium",
+      "message": "Component R1 is missing manufacturer or MPN metadata.",
+      "remediation": "Add manufacturer and manufacturer part number metadata.",
+      "locations": [
+        {
+          "path": "bom-missing-mpn.kicad_sch",
+          "line": 4,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-BOM-001",
+      "title": "component is missing manufacturer part metadata",
+      "severity": "medium",
+      "message": "Component R1 is missing manufacturer or MPN metadata.",
+      "remediation": "Add manufacturer and manufacturer part number metadata.",
+      "locations": [
         {
           "path": "bom.csv",
           "line": 2,

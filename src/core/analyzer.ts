@@ -3,7 +3,7 @@ import { loadConfig } from "./config.js";
 import { discoverProjects } from "./discovery.js";
 import type { AnalyzeOptions, BoardGuardReport, ReportCounts } from "./types.js";
 import type { Finding } from "./findings.js";
-import { isBlockingSeverity, maxSeverity, type SeverityName } from "./severities.js";
+import { isBlockingSeverity, maxSeverity, severityOrder, type SeverityName } from "./severities.js";
 import { normalizeRelative, resolveFrom } from "../util/paths.js";
 import { runKicadChecks } from "../kicad/cli.js";
 import { projectFindings } from "../rules/project.js";
@@ -102,7 +102,7 @@ function countFindings(findings: Finding[]): ReportCounts {
 }
 
 function compareFindings(a: Finding, b: Finding): number {
-  return a.ruleId.localeCompare(b.ruleId) || a.severity.localeCompare(b.severity) || (a.locations[0]?.path ?? "").localeCompare(b.locations[0]?.path ?? "") || a.message.localeCompare(b.message);
+  return (severityOrder[b.severity] - severityOrder[a.severity]) || a.ruleId.localeCompare(b.ruleId) || (a.locations[0]?.path ?? "").localeCompare(b.locations[0]?.path ?? "") || a.message.localeCompare(b.message);
 }
 
 function normalizeLocationPath(root: string, value: string): string {

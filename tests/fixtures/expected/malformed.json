@@ -34,32 +34,6 @@
   "maxSeverity": "high",
   "findings": [
     {
-      "ruleId": "BG-KICAD-001",
-      "title": "kicad-cli is unavailable",
-      "severity": "medium",
-      "message": "kicad-cli was not found, so KiCad-backed ERC and DRC checks were skipped.",
-      "remediation": "Install KiCad CLI or configure kicad-cli-path.",
-      "locations": [
-        {
-          "path": "."
-        }
-      ]
-    },
-    {
-      "ruleId": "BG-MFG-001",
-      "title": "manufacturing release metadata is missing",
-      "severity": "medium",
-      "message": "No boardguard.yml manufacturing release metadata was found.",
-      "remediation": "Add boardguard.yml with board name, revision, output profile, and release artifact policy.",
-      "locations": [
-        {
-          "path": "boardguard.yml",
-          "line": 1,
-          "column": 1
-        }
-      ]
-    },
-    {
       "ruleId": "BG-PROJ-004",
       "title": "KiCad design file appears malformed or unreadable",
       "severity": "high",
@@ -96,6 +70,32 @@
       "locations": [
         {
           "path": "malformed.kicad_sch",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-KICAD-001",
+      "title": "kicad-cli is unavailable",
+      "severity": "medium",
+      "message": "kicad-cli was not found, so KiCad-backed ERC and DRC checks were skipped.",
+      "remediation": "Install KiCad CLI or configure kicad-cli-path.",
+      "locations": [
+        {
+          "path": "."
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-MFG-001",
+      "title": "manufacturing release metadata is missing",
+      "severity": "medium",
+      "message": "No boardguard.yml manufacturing release metadata was found.",
+      "remediation": "Add boardguard.yml with board name, revision, output profile, and release artifact policy.",
+      "locations": [
+        {
+          "path": "boardguard.yml",
           "line": 1,
           "column": 1
         }

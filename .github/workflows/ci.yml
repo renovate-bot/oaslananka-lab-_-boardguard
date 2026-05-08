@@ -36,43 +36,45 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          corepack enable
           corepack prepare pnpm@11.0.8 --activate
+          corepack pnpm --version
       - name: Install dependencies
         shell: bash
         run: |
           set -euo pipefail
-          pnpm install --frozen-lockfile
+          corepack pnpm install --frozen-lockfile
       - name: Format check
         shell: bash
         run: |
           set -euo pipefail
-          pnpm run format:check
+          corepack pnpm run format:check
       - name: Lint
         shell: bash
         run: |
           set -euo pipefail
-          pnpm run lint
+          corepack pnpm run lint
       - name: Typecheck
         shell: bash
         run: |
           set -euo pipefail
-          pnpm run typecheck
+          corepack pnpm run typecheck
       - name: Build
         shell: bash
         run: |
           set -euo pipefail
-          pnpm run build
+          corepack pnpm run build
       - name: Unit and fixture tests
         shell: bash
         run: |
           set -euo pipefail
-          pnpm test
-          pnpm run scan:fixtures
+          corepack pnpm test
+          corepack pnpm run scan:fixtures
       - name: Action build
         shell: bash
         run: |
           set -euo pipefail
-          pnpm run action:build
+          corepack pnpm run action:build
           node scripts/validate-action-metadata.mjs
       - name: CLI smoke test
         shell: bash
@@ -85,7 +87,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p boardguard-results
-          pnpm pack --pack-destination boardguard-results
+          corepack pnpm pack --pack-destination boardguard-results
       - name: Upload diagnostic artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
