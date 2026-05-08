@@ -1,0 +1,10 @@
+(kicad_sch
+  (version 20250114)
+  (generator "boardguard")
+  (symbol
+    (lib_id "Device:R")
+    (property "Reference" "R1")
+    (property "Value" "10k")
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric")
+  )
+)

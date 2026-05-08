@@ -1,0 +1,12 @@
+(kicad_sch
+  (version 20250114)
+  (generator "boardguard")
+  (symbol
+    (lib_id "Device:C")
+    (property "Reference" "C1")
+    (property "Value" "100nF")
+    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric")
+    (property "Manufacturer" "Murata")
+    (property "MPN" "GRM188R71C104KA01D")
+  )
+)

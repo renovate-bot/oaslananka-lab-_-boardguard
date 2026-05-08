@@ -1,0 +1,41 @@
+version: 1
+
+project:
+  path: safe-basic.kicad_pro
+  require_kicad_cli: false
+
+reports:
+  json: true
+  sarif: true
+  markdown: true
+
+manufacturing:
+  board_name: safe-basic
+  revision: rev-a
+  output_dir: manufacturing
+  expected_artifacts:
+    gerber: true
+    drill: true
+    bom: true
+    cpl: true
+    schematic_pdf: true
+    pcb_pdf: true
+    step: false
+
+bom:
+  required_fields:
+    - Reference
+    - Value
+    - Footprint
+    - Manufacturer
+    - MPN
+
+rules:
+  BG-PROJ-001: error
+  BG-PROJ-002: warning
+  BG-KICAD-001: warning
+  BG-ERC-001: error
+  BG-DRC-001: error
+  BG-BOM-001: warning
+  BG-MFG-001: warning
+  BG-PIN-001: error

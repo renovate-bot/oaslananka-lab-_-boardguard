@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "boardguard",
+    "version": "0.1.0"
+  },
+  "mode": "warn",
+  "projectCount": 1,
+  "projects": [
+    {
+      "projectFile": "bom-missing-mpn.kicad_pro",
+      "root": ".",
+      "schematicFiles": [
+        "bom-missing-mpn.kicad_sch"
+      ],
+      "boardFiles": [
+        "bom-missing-mpn.kicad_pcb"
+      ]
+    }
+  ],
+  "kicad": {
+    "found": false,
+    "ercStatus": "unavailable",
+    "drcStatus": "unavailable"
+  },
+  "counts": {
+    "total": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "low": 0,
+    "info": 0
+  },
+  "maxSeverity": "high",
+  "findings": [
+    {
+      "ruleId": "BG-BOM-001",
+      "title": "component is missing manufacturer part metadata",
+      "severity": "medium",
+      "message": "Component R1 is missing manufacturer or MPN metadata.",
+      "remediation": "Add manufacturer and manufacturer part number metadata.",
+      "locations": [
+        {
+          "path": "bom-missing-mpn.kicad_sch",
+          "line": 4,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-BOM-001",
+      "title": "component is missing manufacturer part metadata",
+      "severity": "medium",
+      "message": "Component R1 is missing manufacturer or MPN metadata.",
+      "remediation": "Add manufacturer and manufacturer part number metadata.",
+      "locations": [
+        {
+          "path": "bom.csv",
+          "line": 2,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-BOM-002",
+      "title": "duplicate component designator found",
+      "severity": "high",
+      "message": "Duplicate component designator R1 was found.",
+      "remediation": "Re-annotate or correct duplicated designators.",
+      "locations": [
+        {
+          "path": "bom-missing-mpn.kicad_sch",
+          "line": 4,
+          "column": 1
+        },
+        {
+          "path": "bom.csv",
+          "line": 2,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-KICAD-001",
+      "title": "kicad-cli is unavailable",
+      "severity": "medium",
+      "message": "kicad-cli was not found, so KiCad-backed ERC and DRC checks were skipped.",
+      "remediation": "Install KiCad CLI or configure kicad-cli-path.",
+      "locations": [
+        {
+          "path": "."
+        }
+      ]
+    }
+  ]
+}

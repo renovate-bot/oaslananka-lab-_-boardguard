@@ -1,0 +1,6 @@
+version: 1
+pins:
+  - designator: U1
+    pin: "1"
+    net: MCU_PA1
+    firmware: PA0

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "boardguard",
+    "version": "0.1.0"
+  },
+  "mode": "warn",
+  "projectCount": 2,
+  "projects": [
+    {
+      "projectFile": "a/a.kicad_pro",
+      "root": "a",
+      "schematicFiles": [],
+      "boardFiles": []
+    },
+    {
+      "projectFile": "b/b.kicad_pro",
+      "root": "b",
+      "schematicFiles": [],
+      "boardFiles": []
+    }
+  ],
+  "kicad": {
+    "found": false,
+    "ercStatus": "unavailable",
+    "drcStatus": "unavailable"
+  },
+  "counts": {
+    "total": 5,
+    "critical": 0,
+    "high": 2,
+    "medium": 3,
+    "low": 0,
+    "info": 0
+  },
+  "maxSeverity": "high",
+  "findings": [
+    {
+      "ruleId": "BG-KICAD-001",
+      "title": "kicad-cli is unavailable",
+      "severity": "medium",
+      "message": "kicad-cli was not found, so KiCad-backed ERC and DRC checks were skipped.",
+      "remediation": "Install KiCad CLI or configure kicad-cli-path.",
+      "locations": [
+        {
+          "path": "."
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-MFG-001",
+      "title": "manufacturing release metadata is missing",
+      "severity": "medium",
+      "message": "No boardguard.yml manufacturing release metadata was found.",
+      "remediation": "Add boardguard.yml with board name, revision, output profile, and release artifact policy.",
+      "locations": [
+        {
+          "path": "boardguard.yml",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-PROJ-002",
+      "title": "multiple KiCad projects found without explicit selection",
+      "severity": "medium",
+      "message": "2 KiCad projects were found without an explicit project selection.",
+      "remediation": "Set the project input to the intended .kicad_pro path.",
+      "locations": [
+        {
+          "path": "a/a.kicad_pro",
+          "line": 1,
+          "column": 1
+        },
+        {
+          "path": "b/b.kicad_pro",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-PROJ-003",
+      "title": "KiCad project is missing schematic or board file",
+      "severity": "high",
+      "message": "Project a/a.kicad_pro is missing an associated schematic and board file.",
+      "remediation": "Add the missing design file or configure BoardGuard to scan the correct project path.",
+      "locations": [
+        {
+          "path": "a/a.kicad_pro",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-PROJ-003",
+      "title": "KiCad project is missing schematic or board file",
+      "severity": "high",
+      "message": "Project b/b.kicad_pro is missing an associated schematic and board file.",
+      "remediation": "Add the missing design file or configure BoardGuard to scan the correct project path.",
+      "locations": [
+        {
+          "path": "b/b.kicad_pro",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    }
+  ]
+}
