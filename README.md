@@ -4,7 +4,7 @@ BoardGuard is a local-first CLI and GitHub Action for KiCad hardware design revi
 
 It is the repository CI layer for hardware projects. KiCad Studio remains the local IDE and VS Code layer. KiCad MCP Pro remains the MCP execution layer. BoardGuard works by itself in v0.1 and does not require either integration.
 
-Repository source metadata points to `oaslananka/boardguard`. The organization repository `oaslananka-lab/boardguard` carries the same project contents and is the guarded CI/CD execution target. The example Action reference uses the organization repository because CI validation and release automation run there.
+The personal repository `oaslananka/boardguard` is the source/original content repository. The organization repository `oaslananka-lab/boardguard` carries byte-equivalent project contents and is the guarded CI/CD, release, support, and security boundary. Package and Action metadata point to the organization repository because public support, release automation, and validation run there.
 
 ## Install
 

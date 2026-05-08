@@ -2,8 +2,9 @@
 
 Repository automation must preserve the two-repository operating model:
 
-- `oaslananka/boardguard` is the source repository used for package metadata, issues, and public project URLs.
-- `oaslananka-lab/boardguard` carries the same project contents and is the guarded CI/CD execution target.
+- `oaslananka/boardguard` is the source/original content repository.
+- `oaslananka-lab/boardguard` carries byte-equivalent project contents and is the guarded CI/CD, release, support, and security boundary.
+- Package metadata, Action examples, support links, and release links point to `oaslananka-lab/boardguard`.
 - CI, security scanning, release preparation, and artifact generation run only when `github.repository == 'oaslananka-lab/boardguard'`.
 
 Rules:

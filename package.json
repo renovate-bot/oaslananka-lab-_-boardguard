@@ -7,12 +7,12 @@
   "author": "BoardGuard maintainers",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oaslananka/boardguard.git"
+    "url": "git+https://github.com/oaslananka-lab/boardguard.git"
   },
   "bugs": {
-    "url": "https://github.com/oaslananka/boardguard/issues"
+    "url": "https://github.com/oaslananka-lab/boardguard/issues"
   },
-  "homepage": "https://github.com/oaslananka/boardguard#readme",
+  "homepage": "https://github.com/oaslananka-lab/boardguard#readme",
   "engines": {
     "node": ">=24 <27"
   },
