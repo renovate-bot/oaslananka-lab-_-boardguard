@@ -1,0 +1,25 @@
+name: Bug report
+description: Report a reproducible BoardGuard problem.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Minimal commands, fixture, or repository structure.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: BoardGuard version
+    validations:
+      required: false
