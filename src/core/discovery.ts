@@ -1,0 +1,53 @@
+import path from "node:path";
+import { listFiles, pathExists } from "../util/fs.js";
+import { resolveFrom } from "../util/paths.js";
+import type { ProjectDiscovery } from "./types.js";
+
+export interface DiscoveryResult {
+  scanRoot: string;
+  explicit: boolean;
+  projectFiles: string[];
+  projects: ProjectDiscovery[];
+}
+
+export async function discoverProjects(rootInput: string, explicitProject?: string): Promise<DiscoveryResult> {
+  const scanRoot = path.resolve(rootInput);
+  let projectFiles: string[];
+  let explicit = false;
+
+  if (explicitProject) {
+    explicit = true;
+    const projectPath = resolveFrom(scanRoot, explicitProject);
+    if ((await pathExists(projectPath)) && projectPath.endsWith(".kicad_pro")) {
+      projectFiles = [projectPath];
+    } else {
+      projectFiles = [];
+    }
+  } else {
+    projectFiles = await listFiles(scanRoot, (file) => file.endsWith(".kicad_pro"));
+  }
+
+  projectFiles.sort((a, b) => a.localeCompare(b));
+  const projects: ProjectDiscovery[] = [];
+  for (const projectFile of projectFiles) {
+    const root = path.dirname(projectFile);
+    const base = path.basename(projectFile, ".kicad_pro");
+    const designFiles = await listFiles(root, (file) => {
+      const parent = path.dirname(file);
+      return parent === root && (file.endsWith(".kicad_sch") || file.endsWith(".kicad_pcb"));
+    });
+    const schematicFiles = designFiles
+      .filter((file) => file.endsWith(".kicad_sch"))
+      .sort((a, b) => scoreAssociated(base, a) - scoreAssociated(base, b) || a.localeCompare(b));
+    const boardFiles = designFiles
+      .filter((file) => file.endsWith(".kicad_pcb"))
+      .sort((a, b) => scoreAssociated(base, a) - scoreAssociated(base, b) || a.localeCompare(b));
+    projects.push({ projectFile, root, schematicFiles, boardFiles });
+  }
+
+  return { scanRoot, explicit, projectFiles, projects };
+}
+
+function scoreAssociated(base: string, file: string): number {
+  return path.basename(file, path.extname(file)) === base ? 0 : 1;
+}
