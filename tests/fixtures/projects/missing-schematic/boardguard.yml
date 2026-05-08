@@ -1,0 +1,13 @@
+version: 1
+manufacturing:
+  board_name: missing-schematic
+  revision: rev-a
+  output_dir: manufacturing
+  expected_artifacts:
+    gerber: true
+    drill: true
+    bom: true
+    cpl: true
+    schematic_pdf: true
+    pcb_pdf: true
+    step: false

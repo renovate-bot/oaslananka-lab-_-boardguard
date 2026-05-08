@@ -1,0 +1,13 @@
+(kicad_sch
+  (version 20250114)
+  (generator "boardguard")
+  (symbol
+    (lib_id "MCU:Generic")
+    (property "Reference" "U1")
+    (property "Value" "MCU")
+    (property "Footprint" "Package_QFP:LQFP-48")
+    (property "Manufacturer" "Example")
+    (property "MPN" "MCU-EXAMPLE")
+  )
+  (label "MCU_PA0")
+)

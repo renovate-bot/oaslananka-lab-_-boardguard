@@ -1,0 +1,6 @@
+title = "BoardGuard gitleaks configuration"
+
+[[allowlists]]
+description = "Bundled GitHub Actions artifact client contains Azure connection string parser literals, not credentials."
+paths = ["dist/index.js"]
+regexes = ['''AccountKey=''']

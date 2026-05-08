@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "boardguard",
+    "version": "0.1.0"
+  },
+  "mode": "warn",
+  "projectCount": 1,
+  "projects": [
+    {
+      "projectFile": "pinmap-mismatch.kicad_pro",
+      "root": ".",
+      "schematicFiles": [
+        "pinmap-mismatch.kicad_sch"
+      ],
+      "boardFiles": [
+        "pinmap-mismatch.kicad_pcb"
+      ]
+    }
+  ],
+  "kicad": {
+    "found": false,
+    "ercStatus": "unavailable",
+    "drcStatus": "unavailable"
+  },
+  "counts": {
+    "total": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "low": 0,
+    "info": 0
+  },
+  "maxSeverity": "high",
+  "findings": [
+    {
+      "ruleId": "BG-PIN-001",
+      "title": "firmware pinmap is inconsistent with declared hardware mapping",
+      "severity": "high",
+      "message": "Pinmap net MCU_PA1 for U1.1 was not found in extracted schematic labels.",
+      "remediation": "Update firmware pinmap or schematic net labels to match.",
+      "locations": [
+        {
+          "path": "firmware-pins.yml",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-KICAD-001",
+      "title": "kicad-cli is unavailable",
+      "severity": "medium",
+      "message": "kicad-cli was not found, so KiCad-backed ERC and DRC checks were skipped.",
+      "remediation": "Install KiCad CLI or configure kicad-cli-path.",
+      "locations": [
+        {
+          "path": "."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+(kicad_sch
+  (version 20250114)
+  (generator "boardguard")
+  (paper "A4")
+  (symbol
+    (lib_id "Device:R")
+    (at 10 10 0)
+    (unit 1)
+    (property "Reference" "R1" (at 10 10 0))
+    (property "Value" "10k" (at 10 12 0))
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 10 14 0))
+    (property "Manufacturer" "Yageo" (at 10 16 0))
+    (property "MPN" "RC0603FR-0710KL" (at 10 18 0))
+  )
+  (label "MCU_PA0" (at 20 20 0))
+)

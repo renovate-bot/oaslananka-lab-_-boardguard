@@ -1,0 +1,87 @@
+name: BoardGuard
+description: Hardware design review, CI validation, and release preflight for KiCad projects.
+author: BoardGuard maintainers
+branding:
+  icon: shield
+  color: blue
+inputs:
+  path:
+    description: Directory to scan.
+    required: false
+    default: .
+  project:
+    description: Explicit .kicad_pro project path.
+    required: false
+    default: ""
+  config:
+    description: BoardGuard configuration file path.
+    required: false
+    default: boardguard.yml
+  mode:
+    description: warn or enforce.
+    required: false
+    default: warn
+  require-kicad:
+    description: Fail when kicad-cli is unavailable.
+    required: false
+    default: "false"
+  kicad-cli:
+    description: Explicit kicad-cli path.
+    required: false
+    default: ""
+  bom:
+    description: Optional BOM CSV path.
+    required: false
+    default: ""
+  pinmap:
+    description: Optional firmware pinmap YAML or JSON path.
+    required: false
+    default: ""
+  sarif:
+    description: Write SARIF report.
+    required: false
+    default: "true"
+  json:
+    description: Write JSON report.
+    required: false
+    default: "true"
+  markdown:
+    description: Write Markdown report.
+    required: false
+    default: "true"
+  upload-sarif:
+    description: Upload SARIF to GitHub code scanning.
+    required: false
+    default: "false"
+  upload-artifacts:
+    description: Upload BoardGuard result files as workflow artifacts.
+    required: false
+    default: "true"
+outputs:
+  findings:
+    description: Total finding count.
+  critical:
+    description: Critical finding count.
+  high:
+    description: High finding count.
+  medium:
+    description: Medium finding count.
+  low:
+    description: Low finding count.
+  sarif-path:
+    description: SARIF report path.
+  json-path:
+    description: JSON report path.
+  markdown-path:
+    description: Markdown report path.
+  project-count:
+    description: Number of KiCad projects discovered.
+  kicad-cli-found:
+    description: Whether kicad-cli was found.
+  erc-status:
+    description: ERC status.
+  drc-status:
+    description: DRC status.
+runs:
+  using: node24
+  main: dist/index.js

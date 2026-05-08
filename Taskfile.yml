@@ -1,0 +1,45 @@
+version: "3"
+
+tasks:
+  format:
+    cmds:
+      - pnpm run format
+  lint:
+    cmds:
+      - pnpm run lint
+  typecheck:
+    cmds:
+      - pnpm run typecheck
+  test:
+    cmds:
+      - pnpm test
+  security:
+    cmds:
+      - pnpm run security
+  build:
+    cmds:
+      - pnpm run build
+      - pnpm run action:build
+  action:build:
+    cmds:
+      - pnpm run action:build
+  fixtures:
+    cmds:
+      - pnpm run fixtures
+  scan:fixtures:
+    cmds:
+      - pnpm run scan:fixtures
+  release:dry-run:
+    cmds:
+      - pnpm run release:dry-run
+  ci:
+    cmds:
+      - pnpm run format:check
+      - pnpm run lint
+      - pnpm run typecheck
+      - pnpm run build
+      - pnpm test
+      - pnpm run action:build
+      - pnpm run scan:fixtures
+      - pnpm run security
+      - pnpm run release:dry-run

@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "boardguard",
+    "version": "0.1.0"
+  },
+  "mode": "warn",
+  "projectCount": 1,
+  "projects": [
+    {
+      "projectFile": "malformed.kicad_pro",
+      "root": ".",
+      "schematicFiles": [
+        "malformed.kicad_sch"
+      ],
+      "boardFiles": [
+        "malformed.kicad_pcb"
+      ]
+    }
+  ],
+  "kicad": {
+    "found": false,
+    "ercStatus": "unavailable",
+    "drcStatus": "unavailable"
+  },
+  "counts": {
+    "total": 5,
+    "critical": 0,
+    "high": 3,
+    "medium": 2,
+    "low": 0,
+    "info": 0
+  },
+  "maxSeverity": "high",
+  "findings": [
+    {
+      "ruleId": "BG-PROJ-004",
+      "title": "KiCad design file appears malformed or unreadable",
+      "severity": "high",
+      "message": "PCB file is malformed or unreadable: PCB file is suspiciously small or missing kicad_pcb root.",
+      "remediation": "Open and save the project in KiCad or restore the valid file.",
+      "locations": [
+        {
+          "path": "malformed.kicad_pcb",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-PROJ-004",
+      "title": "KiCad design file appears malformed or unreadable",
+      "severity": "high",
+      "message": "Project file is malformed or unreadable: file is suspiciously small.",
+      "remediation": "Open and save the project in KiCad or restore the valid file.",
+      "locations": [
+        {
+          "path": "malformed.kicad_pro",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-PROJ-004",
+      "title": "KiCad design file appears malformed or unreadable",
+      "severity": "high",
+      "message": "Schematic file is malformed or unreadable: schematic file is suspiciously small or missing kicad_sch root.",
+      "remediation": "Open and save the project in KiCad or restore the valid file.",
+      "locations": [
+        {
+          "path": "malformed.kicad_sch",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-KICAD-001",
+      "title": "kicad-cli is unavailable",
+      "severity": "medium",
+      "message": "kicad-cli was not found, so KiCad-backed ERC and DRC checks were skipped.",
+      "remediation": "Install KiCad CLI or configure kicad-cli-path.",
+      "locations": [
+        {
+          "path": "."
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-MFG-001",
+      "title": "manufacturing release metadata is missing",
+      "severity": "medium",
+      "message": "No boardguard.yml manufacturing release metadata was found.",
+      "remediation": "Add boardguard.yml with board name, revision, output profile, and release artifact policy.",
+      "locations": [
+        {
+          "path": "boardguard.yml",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    }
+  ]
+}

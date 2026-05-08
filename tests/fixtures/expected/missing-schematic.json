@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "boardguard",
+    "version": "0.1.0"
+  },
+  "mode": "warn",
+  "projectCount": 1,
+  "projects": [
+    {
+      "projectFile": "missing-schematic.kicad_pro",
+      "root": ".",
+      "schematicFiles": [],
+      "boardFiles": [
+        "missing-schematic.kicad_pcb"
+      ]
+    }
+  ],
+  "kicad": {
+    "found": false,
+    "ercStatus": "unavailable",
+    "drcStatus": "unavailable"
+  },
+  "counts": {
+    "total": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "low": 0,
+    "info": 0
+  },
+  "maxSeverity": "high",
+  "findings": [
+    {
+      "ruleId": "BG-PROJ-003",
+      "title": "KiCad project is missing schematic or board file",
+      "severity": "high",
+      "message": "Project missing-schematic.kicad_pro is missing an associated schematic file.",
+      "remediation": "Add the missing design file or configure BoardGuard to scan the correct project path.",
+      "locations": [
+        {
+          "path": "missing-schematic.kicad_pro",
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "ruleId": "BG-KICAD-001",
+      "title": "kicad-cli is unavailable",
+      "severity": "medium",
+      "message": "kicad-cli was not found, so KiCad-backed ERC and DRC checks were skipped.",
+      "remediation": "Install KiCad CLI or configure kicad-cli-path.",
+      "locations": [
+        {
+          "path": "."
+        }
+      ]
+    }
+  ]
+}
