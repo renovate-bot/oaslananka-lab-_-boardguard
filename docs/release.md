@@ -18,3 +18,5 @@ The org repository uses a selected-actions policy with full-SHA pinning. Keep Gi
 
 - `googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7`
 - `ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a`
+
+Keep default workflow token permissions read-only, and enable workflow pull request creation so release-please can open release PRs. BoardGuard workflows must not submit approving reviews.
