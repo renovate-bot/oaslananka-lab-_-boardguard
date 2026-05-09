@@ -12,6 +12,7 @@ import { formatJson } from "../src/report/json.js";
 import { formatMarkdown } from "../src/report/markdown.js";
 import { formatSarif } from "../src/report/sarif.js";
 import { runCli } from "../src/cli/main.js";
+import { parseSchematic } from "../src/kicad/schematic.js";
 import { parseSExpression } from "../src/kicad/sexpr.js";
 import { runProcess } from "../src/util/process.js";
 import { listFiles } from "../src/util/fs.js";
@@ -38,6 +39,23 @@ describe("project discovery", () => {
     const missingSchematic = await scanFixture("missing-schematic");
     expect(missingBoard.findings.some((finding) => finding.ruleId === "BG-PROJ-003")).toBe(true);
     expect(missingSchematic.findings.some((finding) => finding.ruleId === "BG-PROJ-003")).toBe(true);
+  });
+
+  it("associates same-directory design files by project basename", async () => {
+    const temp = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-discovery-"));
+    for (const name of ["alpha", "beta"]) {
+      await fs.writeFile(path.join(temp, `${name}.kicad_pro`), JSON.stringify({ meta: { version: 1 } }), "utf8");
+      await fs.writeFile(path.join(temp, `${name}.kicad_sch`), schematic(`${name.toUpperCase()}1`, `${name.toUpperCase()}2`), "utf8");
+      await fs.writeFile(path.join(temp, `${name}.kicad_pcb`), pcb(name), "utf8");
+    }
+    await fs.writeFile(path.join(temp, "power.kicad_sch"), schematic("PWR1", "PWR2"), "utf8");
+    const result = await discoverProjects(temp);
+    expect(result.projects).toHaveLength(2);
+    for (const project of result.projects) {
+      const base = path.basename(project.projectFile, ".kicad_pro");
+      expect(project.schematicFiles).toEqual([path.join(temp, `${base}.kicad_sch`), path.join(temp, "power.kicad_sch")]);
+      expect(project.boardFiles).toEqual([path.join(temp, `${base}.kicad_pcb`)]);
+    }
   });
 
   it("does not crash on malformed KiCad files", async () => {
@@ -123,6 +141,31 @@ bom:
     const report = await analyze(baseOptions(temp));
     const quantityFindings = report.findings.filter((finding) => finding.message.includes("declares quantity 3 but lists 2 designators"));
     expect(quantityFindings).toHaveLength(1);
+  });
+
+  it("ignores KiCad symbol library definitions when extracting schematic components", async () => {
+    const temp = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-schematic-"));
+    const schematicPath = path.join(temp, "library-symbols.kicad_sch");
+    await fs.writeFile(schematicPath, `(kicad_sch
+  (version 20250114)
+  (lib_symbols
+    (symbol "Device:R"
+      (property "Reference" "R")
+      (property "Value" "R")
+      (symbol "Device:R_0_1")
+    )
+  )
+  (symbol
+    (lib_id	"Device:R")
+    (property "Reference" "R1")
+    (property "Value" "10k")
+    (property "Footprint" "Resistor_SMD:R_0603")
+    (property "Manufacturer" "Yageo")
+    (property "MPN" "RC0603FR-0710KL")
+  )
+)`, "utf8");
+    const parsed = await parseSchematic(schematicPath);
+    expect(parsed.components.map((component) => component.reference)).toEqual(["R1"]);
   });
 });
 

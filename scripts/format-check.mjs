@@ -21,7 +21,7 @@ const textExtensions = new Set([
 ]);
 
 const failures = [];
-for (const file of await listFiles(process.cwd())) {
+for (const file of await listTrackedFiles(process.cwd())) {
   if (!isTextFile(file)) {
     continue;
   }
@@ -41,6 +41,14 @@ if (failures.length > 0) {
   process.exitCode = 1;
 }
 
+async function listTrackedFiles(root) {
+  const output = await runGit(["ls-files", "-z"], root);
+  if (output !== undefined) {
+    return output.split("\0").filter(Boolean).map((file) => path.join(root, file));
+  }
+  return listFiles(root);
+}
+
 async function listFiles(root) {
   const results = [];
   async function walk(directory) {
@@ -58,6 +66,22 @@ async function listFiles(root) {
   }
   await walk(root);
   return results;
+}
+
+async function runGit(args, cwd) {
+  const { spawn } = await import("node:child_process");
+  return new Promise((resolve) => {
+    const child = spawn("git", args, { cwd, shell: false, windowsHide: true });
+    let stdout = "";
+    child.stdout.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.on("error", () => resolve(undefined));
+    child.on("close", (code) => {
+      resolve(code === 0 ? stdout : undefined);
+    });
+  });
 }
 
 function isTextFile(file) {

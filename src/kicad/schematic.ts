@@ -43,6 +43,10 @@ function extractComponents(text: string, sourcePath: string): ComponentRecord[] 
     if (!symbolText) {
       break;
     }
+    if (!/\(lib_id\s+/.test(symbolText)) {
+      index = symbolStart + symbolText.length;
+      continue;
+    }
     const properties = new Map<string, string>();
     const propertyPattern = /\(property\s+"([^"]+)"\s+"([^"]*)"/g;
     for (const match of symbolText.matchAll(propertyPattern)) {

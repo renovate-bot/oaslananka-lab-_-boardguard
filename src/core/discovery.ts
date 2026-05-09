@@ -35,6 +35,11 @@ export async function discoverProjects(rootInput: string, explicitProject?: stri
   for (const projectFile of projectFiles) {
     const root = path.dirname(projectFile);
     const base = path.basename(projectFile, ".kicad_pro");
+    const siblingProjectBases = new Set(
+      projectFiles
+        .filter((file) => path.dirname(file) === root)
+        .map((file) => path.basename(file, ".kicad_pro"))
+    );
     const designFiles = await listFiles(root, (file) => {
       const parent = path.dirname(file);
       return parent === root && (file.endsWith(".kicad_sch") || file.endsWith(".kicad_pcb"));
@@ -42,12 +47,8 @@ export async function discoverProjects(rootInput: string, explicitProject?: stri
       allowedExtensions: [".kicad_sch", ".kicad_pcb"],
       maxDepth: 1
     });
-    const schematicFiles = designFiles
-      .filter((file) => file.endsWith(".kicad_sch"))
-      .sort((a, b) => scoreAssociated(base, a) - scoreAssociated(base, b) || a.localeCompare(b));
-    const boardFiles = designFiles
-      .filter((file) => file.endsWith(".kicad_pcb"))
-      .sort((a, b) => scoreAssociated(base, a) - scoreAssociated(base, b) || a.localeCompare(b));
+    const schematicFiles = associatedSchematicFiles(designFiles.filter((file) => file.endsWith(".kicad_sch")), base, siblingProjectBases);
+    const boardFiles = associatedBoardFiles(designFiles.filter((file) => file.endsWith(".kicad_pcb")), base);
     projects.push({ projectFile, root, schematicFiles, boardFiles });
   }
 
@@ -56,4 +57,21 @@ export async function discoverProjects(rootInput: string, explicitProject?: stri
 
 function scoreAssociated(base: string, file: string): number {
   return path.basename(file, path.extname(file)) === base ? 0 : 1;
+}
+
+function associatedBoardFiles(files: string[], base: string): string[] {
+  const exact = files.filter((file) => scoreAssociated(base, file) === 0);
+  return exact.length > 0 ? exact : files;
+}
+
+function associatedSchematicFiles(files: string[], base: string, siblingProjectBases: Set<string>): string[] {
+  const exact = files.filter((file) => scoreAssociated(base, file) === 0);
+  if (exact.length === 0) {
+    return files;
+  }
+  const sheets = files.filter((file) => {
+    const fileBase = path.basename(file, path.extname(file));
+    return fileBase === base || !siblingProjectBases.has(fileBase);
+  });
+  return sheets;
 }

@@ -9,8 +9,14 @@ import { normalizeRelative, resolveFrom } from "../util/paths.js";
 
 export async function bomFindings(root: string, projects: ProjectDiscovery[], bomInput: string | undefined, config?: BoardGuardConfig): Promise<Finding[]> {
   const schematicComponents: ComponentRecord[] = [];
+  const parsedSchematicFiles = new Set<string>();
   for (const project of projects) {
     for (const schematic of project.schematicFiles) {
+      const normalizedSchematic = path.resolve(schematic);
+      if (parsedSchematicFiles.has(normalizedSchematic)) {
+        continue;
+      }
+      parsedSchematicFiles.add(normalizedSchematic);
       const parsed = await parseSchematic(schematic);
       if (parsed.valid) {
         schematicComponents.push(...parsed.components);

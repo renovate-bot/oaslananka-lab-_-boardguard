@@ -101386,6 +101386,9 @@ async function discoverProjects(rootInput, explicitProject) {
   for (const projectFile of projectFiles) {
     const root = import_node_path5.default.dirname(projectFile);
     const base = import_node_path5.default.basename(projectFile, ".kicad_pro");
+    const siblingProjectBases = new Set(
+      projectFiles.filter((file) => import_node_path5.default.dirname(file) === root).map((file) => import_node_path5.default.basename(file, ".kicad_pro"))
+    );
     const designFiles = await listFiles(root, (file) => {
       const parent = import_node_path5.default.dirname(file);
       return parent === root && (file.endsWith(".kicad_sch") || file.endsWith(".kicad_pcb"));
@@ -101393,14 +101396,29 @@ async function discoverProjects(rootInput, explicitProject) {
       allowedExtensions: [".kicad_sch", ".kicad_pcb"],
       maxDepth: 1
     });
-    const schematicFiles = designFiles.filter((file) => file.endsWith(".kicad_sch")).sort((a, b) => scoreAssociated(base, a) - scoreAssociated(base, b) || a.localeCompare(b));
-    const boardFiles = designFiles.filter((file) => file.endsWith(".kicad_pcb")).sort((a, b) => scoreAssociated(base, a) - scoreAssociated(base, b) || a.localeCompare(b));
+    const schematicFiles = associatedSchematicFiles(designFiles.filter((file) => file.endsWith(".kicad_sch")), base, siblingProjectBases);
+    const boardFiles = associatedBoardFiles(designFiles.filter((file) => file.endsWith(".kicad_pcb")), base);
     projects.push({ projectFile, root, schematicFiles, boardFiles });
   }
   return { scanRoot, explicit, projectFiles, projects };
 }
 function scoreAssociated(base, file) {
   return import_node_path5.default.basename(file, import_node_path5.default.extname(file)) === base ? 0 : 1;
+}
+function associatedBoardFiles(files, base) {
+  const exact = files.filter((file) => scoreAssociated(base, file) === 0);
+  return exact.length > 0 ? exact : files;
+}
+function associatedSchematicFiles(files, base, siblingProjectBases) {
+  const exact = files.filter((file) => scoreAssociated(base, file) === 0);
+  if (exact.length === 0) {
+    return files;
+  }
+  const sheets = files.filter((file) => {
+    const fileBase = import_node_path5.default.basename(file, import_node_path5.default.extname(file));
+    return fileBase === base || !siblingProjectBases.has(fileBase);
+  });
+  return sheets;
 }
 
 // src/kicad/cli.ts
@@ -101913,6 +101931,10 @@ function extractComponents(text, sourcePath) {
     if (!symbolText) {
       break;
     }
+    if (!/\(lib_id\s+/.test(symbolText)) {
+      index = symbolStart + symbolText.length;
+      continue;
+    }
     const properties = /* @__PURE__ */ new Map();
     const propertyPattern = /\(property\s+"([^"]+)"\s+"([^"]*)"/g;
     for (const match of symbolText.matchAll(propertyPattern)) {
@@ -102238,8 +102260,14 @@ function splitDesignators(value) {
 // src/rules/bom.ts
 async function bomFindings(root, projects, bomInput, config) {
   const schematicComponents = [];
+  const parsedSchematicFiles = /* @__PURE__ */ new Set();
   for (const project of projects) {
     for (const schematic of project.schematicFiles) {
+      const normalizedSchematic = import_node_path7.default.resolve(schematic);
+      if (parsedSchematicFiles.has(normalizedSchematic)) {
+        continue;
+      }
+      parsedSchematicFiles.add(normalizedSchematic);
       const parsed = await parseSchematic(schematic);
       if (parsed.valid) {
         schematicComponents.push(...parsed.components);
