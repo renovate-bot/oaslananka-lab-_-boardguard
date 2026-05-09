@@ -16,10 +16,6 @@
 * **ci:** add explicit Node type definitions ([4fb2143](https://github.com/oaslananka-lab/boardguard/commit/4fb2143c6a22131fe97ba63722d0892557f1755b))
 * **core:** classify config errors and harden S-expression parsing ([afa8e2c](https://github.com/oaslananka-lab/boardguard/commit/afa8e2cdcbbd8c94da484d76838857b84c9fd638))
 
-## Changelog
-
 ## Unreleased
 
-- Initial BoardGuard 0.1.0 release candidate baseline.
-
-Future released changelog entries are managed by release-please.
+- Future released changelog entries are managed by release-please.

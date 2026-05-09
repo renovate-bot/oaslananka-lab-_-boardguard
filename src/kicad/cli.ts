@@ -10,6 +10,10 @@ export interface KicadCheckFinding {
   kind: "erc" | "drc";
   message: string;
   path: string;
+  line?: number;
+  column?: number;
+  severity?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface KicadRunResult {
@@ -31,25 +35,26 @@ export async function runKicadChecks(projects: ProjectDiscovery[], cliPathInput?
     return { cli, findings };
   }
 
-  const firstProject = projects[0];
-  if (!firstProject) {
-    return { cli, findings };
-  }
-
-  if (firstProject.schematicFiles[0]) {
-    const result = await runKicadReport(detected.path, ["sch", "erc"], firstProject.schematicFiles[0], "erc");
-    cli.ercStatus = result.status;
-    if (result.message) {
-      findings.push({ kind: "erc", message: result.message, path: firstProject.schematicFiles[0] });
+  let ercRan = false;
+  let drcRan = false;
+  let ercFailed = false;
+  let drcFailed = false;
+  for (const project of projects) {
+    for (const schematic of project.schematicFiles) {
+      ercRan = true;
+      const result = await runKicadReport(detected.path, ["sch", "erc"], schematic, "erc");
+      ercFailed ||= result.status === "failed";
+      findings.push(...result.findings);
+    }
+    for (const board of project.boardFiles) {
+      drcRan = true;
+      const result = await runKicadReport(detected.path, ["pcb", "drc"], board, "drc");
+      drcFailed ||= result.status === "failed";
+      findings.push(...result.findings);
     }
   }
-  if (firstProject.boardFiles[0]) {
-    const result = await runKicadReport(detected.path, ["pcb", "drc"], firstProject.boardFiles[0], "drc");
-    cli.drcStatus = result.status;
-    if (result.message) {
-      findings.push({ kind: "drc", message: result.message, path: firstProject.boardFiles[0] });
-    }
-  }
+  cli.ercStatus = ercRan ? (ercFailed ? "failed" : "passed") : "skipped";
+  cli.drcStatus = drcRan ? (drcFailed ? "failed" : "passed") : "skipped";
   return { cli, findings };
 }
 
@@ -84,24 +89,99 @@ async function runKicadReport(
   command: string[],
   inputFile: string,
   kind: "erc" | "drc"
-): Promise<{ status: CheckStatus; message?: string }> {
-  const output = path.join(os.tmpdir(), `boardguard-${kind}-${process.pid}-${Date.now()}.json`);
+): Promise<{ status: CheckStatus; findings: KicadCheckFinding[] }> {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-"));
+  const output = path.join(tempDir, `${kind}.json`);
   const args = [...command, "--format", "json", "--output", output, "--exit-code-violations", inputFile];
-  const result = await runProcess(cliPath, args, 120_000);
+  const result = await runProcess(cliPath, args, { timeoutMs: 120_000, maxStdoutBytes: 128 * 1024, maxStderrBytes: 128 * 1024 });
   let reportText = "";
   try {
     reportText = await fs.readFile(output, "utf8");
   } catch {
     reportText = "";
   } finally {
-    await fs.rm(output, { force: true }).catch(() => undefined);
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
   }
   const outputText = redactControlCharacters(`${result.stdout}\n${result.stderr}\n${reportText}`.trim());
   if (result.code === 0) {
-    return { status: "passed" };
+    return { status: "passed", findings: normalizeKicadFindings(kind, inputFile, reportText) };
   }
   if (result.timedOut) {
-    return { status: "failed", message: `KiCad ${kind.toUpperCase()} timed out` };
+    return { status: "failed", findings: [{ kind, message: `KiCad ${kind.toUpperCase()} timed out`, path: inputFile }] };
   }
-  return { status: "failed", message: outputText || `KiCad ${kind.toUpperCase()} exited with code ${result.code ?? "unknown"}` };
+  const parsed = normalizeKicadFindings(kind, inputFile, reportText);
+  if (parsed.length > 0) {
+    return { status: "failed", findings: parsed };
+  }
+  return {
+    status: "failed",
+    findings: [{ kind, message: outputText || `KiCad ${kind.toUpperCase()} exited with code ${result.code ?? "unknown"}`, path: inputFile }]
+  };
+}
+
+export function normalizeKicadFindings(kind: "erc" | "drc", fallbackPath: string, reportText: string): KicadCheckFinding[] {
+  if (!reportText.trim()) {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(reportText) as unknown;
+    const findings: KicadCheckFinding[] = [];
+    collectDiagnostics(parsed, kind, fallbackPath, findings);
+    return findings.sort((a, b) => a.path.localeCompare(b.path) || (a.line ?? 0) - (b.line ?? 0) || a.message.localeCompare(b.message));
+  } catch {
+    return [{ kind, message: redactControlCharacters(reportText), path: fallbackPath }];
+  }
+}
+
+const maxDiagnosticDepth = 16;
+const maxDiagnosticFindings = 1_000;
+
+function collectDiagnostics(value: unknown, kind: "erc" | "drc", fallbackPath: string, findings: KicadCheckFinding[], depth = 0): void {
+  if (depth > maxDiagnosticDepth || findings.length >= maxDiagnosticFindings) {
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((entry) => collectDiagnostics(entry, kind, fallbackPath, findings, depth + 1));
+    return;
+  }
+  if (!value || typeof value !== "object") {
+    return;
+  }
+  const row = value as Record<string, unknown>;
+  const message = stringField(row, ["message", "description", "title", "text"]);
+  if (message) {
+    findings.push({
+      kind,
+      message: redactControlCharacters(message),
+      path: stringField(row, ["file", "path", "filename", "source"]) ?? fallbackPath,
+      line: numberField(row, ["line", "startLine"]),
+      column: numberField(row, ["column", "startColumn"]),
+      severity: stringField(row, ["severity", "level", "kind"]),
+      metadata: row
+    });
+    return;
+  }
+  for (const entry of Object.values(row)) {
+    collectDiagnostics(entry, kind, fallbackPath, findings, depth + 1);
+  }
+}
+
+function stringField(row: Record<string, unknown>, names: string[]): string | undefined {
+  for (const name of names) {
+    const value = row[name];
+    if (typeof value === "string" && value.trim() !== "") {
+      return value.trim();
+    }
+  }
+  return undefined;
+}
+
+function numberField(row: Record<string, unknown>, names: string[]): number | undefined {
+  for (const name of names) {
+    const value = row[name];
+    if (typeof value === "number" && Number.isInteger(value) && value > 0) {
+      return value;
+    }
+  }
+  return undefined;
 }

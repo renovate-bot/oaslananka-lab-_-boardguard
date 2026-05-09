@@ -4,6 +4,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { DefaultArtifactClient } from "@actions/artifact";
 import { getOctokit } from "@actions/github";
+import { actionInput, booleanActionInput, ensureWorkspaceDirectory, modeActionInput, optionalWorkspacePath, resolveWorkspacePath, workspaceRoot } from "./inputs.js";
 import { analyze, shouldFail } from "../core/analyzer.js";
 import type { AnalyzeOptions } from "../core/types.js";
 import { formatJson } from "../report/json.js";
@@ -11,18 +12,17 @@ import { formatJobSummary } from "../report/summary.js";
 import { formatSarif } from "../report/sarif.js";
 
 async function main(): Promise<void> {
-  const workspace = process.env.GITHUB_WORKSPACE ?? process.cwd();
-  const resultsDir = path.join(workspace, "boardguard-results");
-  await fs.mkdir(resultsDir, { recursive: true });
+  const workspace = await workspaceRoot();
+  const resultsDir = await ensureWorkspaceDirectory(workspace, "boardguard-results", "results");
   const options: AnalyzeOptions = {
-    path: resolveWorkspace(workspace, input("path") || "."),
-    project: emptyToUndefined(input("project")),
-    config: emptyToUndefined(input("config") || "boardguard.yml"),
-    mode: input("mode") === "enforce" ? "enforce" : "warn",
-    requireKicad: boolInput("require-kicad"),
-    kicadCli: emptyToUndefined(input("kicad-cli")),
-    bom: emptyToUndefined(input("bom")),
-    pinmap: emptyToUndefined(input("pinmap")),
+    path: await resolveWorkspacePath(workspace, actionInput("path"), "path", true),
+    project: await optionalWorkspacePath(workspace, actionInput("project"), "project", true),
+    config: await optionalWorkspacePath(workspace, actionInput("config"), "config", false),
+    mode: modeActionInput(),
+    requireKicad: booleanActionInput("require-kicad"),
+    kicadCli: emptyToUndefined(actionInput("kicad-cli")),
+    bom: await optionalWorkspacePath(workspace, actionInput("bom"), "bom", true),
+    pinmap: await optionalWorkspacePath(workspace, actionInput("pinmap"), "pinmap", true),
     exportPlan: true
   };
 
@@ -32,15 +32,15 @@ async function main(): Promise<void> {
   const markdownPath = path.join(resultsDir, "boardguard.md");
   const writtenFiles: string[] = [];
 
-  if (boolInput("json")) {
+  if (booleanActionInput("json")) {
     await fs.writeFile(jsonPath, formatJson(report), "utf8");
     writtenFiles.push(jsonPath);
   }
-  if (boolInput("sarif")) {
+  if (booleanActionInput("sarif")) {
     await fs.writeFile(sarifPath, formatSarif(report), "utf8");
     writtenFiles.push(sarifPath);
   }
-  if (boolInput("markdown")) {
+  if (booleanActionInput("markdown")) {
     await fs.writeFile(markdownPath, formatJobSummary(report), "utf8");
     writtenFiles.push(markdownPath);
   }
@@ -54,20 +54,20 @@ async function main(): Promise<void> {
   setOutput("high", String(report.counts.high));
   setOutput("medium", String(report.counts.medium));
   setOutput("low", String(report.counts.low));
-  setOutput("sarif-path", boolInput("sarif") ? relative(workspace, sarifPath) : "");
-  setOutput("json-path", boolInput("json") ? relative(workspace, jsonPath) : "");
-  setOutput("markdown-path", boolInput("markdown") ? relative(workspace, markdownPath) : "");
+  setOutput("sarif-path", booleanActionInput("sarif") ? relative(workspace, sarifPath) : "");
+  setOutput("json-path", booleanActionInput("json") ? relative(workspace, jsonPath) : "");
+  setOutput("markdown-path", booleanActionInput("markdown") ? relative(workspace, markdownPath) : "");
   setOutput("project-count", String(report.projectCount));
   setOutput("kicad-cli-found", String(report.kicad.found));
   setOutput("erc-status", report.kicad.ercStatus);
   setOutput("drc-status", report.kicad.drcStatus);
 
-  if (boolInput("upload-artifacts") && writtenFiles.length > 0) {
+  if (isGitHubActions() && booleanActionInput("upload-artifacts") && writtenFiles.length > 0) {
     const artifact = new DefaultArtifactClient();
     await artifact.uploadArtifact("boardguard-results", writtenFiles, resultsDir, { retentionDays: 14 });
   }
 
-  if (boolInput("upload-sarif") && boolInput("sarif")) {
+  if (booleanActionInput("upload-sarif") && booleanActionInput("sarif")) {
     await uploadSarif(workspace, sarifPath);
   }
 
@@ -76,30 +76,8 @@ async function main(): Promise<void> {
   }
 }
 
-function input(name: string): string {
-  const keys = [
-    `INPUT_${name.toUpperCase()}`,
-    `INPUT_${name.replace(/-/g, "_").toUpperCase()}`
-  ];
-  for (const key of keys) {
-    const value = process.env[key];
-    if (value !== undefined) {
-      return value.trim();
-    }
-  }
-  return "";
-}
-
-function boolInput(name: string): boolean {
-  return (input(name) || "false").toLowerCase() === "true";
-}
-
 function emptyToUndefined(value: string): string | undefined {
   return value.trim() === "" ? undefined : value;
-}
-
-function resolveWorkspace(workspace: string, value: string): string {
-  return path.isAbsolute(value) ? value : path.join(workspace, value);
 }
 
 function relative(root: string, value: string): string {
@@ -111,6 +89,10 @@ function setOutput(name: string, value: string): void {
     return;
   }
   appendFileSync(process.env.GITHUB_OUTPUT, `${name}=${value}\n`, "utf8");
+}
+
+function isGitHubActions(): boolean {
+  return process.env.GITHUB_ACTIONS === "true";
 }
 
 async function uploadSarif(workspace: string, sarifPath: string): Promise<void> {

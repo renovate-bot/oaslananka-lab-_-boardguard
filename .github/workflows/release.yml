@@ -60,6 +60,9 @@ jobs:
           corepack pnpm install --frozen-lockfile
           corepack pnpm run build
           corepack pnpm run action:build
+          corepack pnpm run pack:check
+          corepack pnpm run cli:smoke
+          corepack pnpm run action:smoke
       - name: Build release artifacts
         shell: bash
         run: |
@@ -76,7 +79,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ needs.release-please.outputs.tag_name }}
+          RELEASE_PLEASE_TAG: ${{ needs.release-please.outputs.tag_name }}
         run: |
           set -euo pipefail
-          gh release upload "$TAG_NAME" boardguard-results/* --clobber
+          gh release upload "$RELEASE_PLEASE_TAG" boardguard-results/* --clobber

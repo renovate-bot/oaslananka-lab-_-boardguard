@@ -4,7 +4,13 @@
       "release-type": "node",
       "package-name": "boardguard",
       "changelog-path": "CHANGELOG.md",
-      "include-component-in-tag": false
+      "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "src/generated/version.ts"
+        }
+      ]
     }
   },
   "pull-request-title-pattern": "chore${scope}: release${component} ${version}",

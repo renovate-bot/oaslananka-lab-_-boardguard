@@ -1,5 +1,6 @@
 import type { BoardGuardReport } from "../core/types.js";
 import { ruleDefinitions } from "../core/findings.js";
+import { createHash } from "node:crypto";
 
 export function formatSarif(report: BoardGuardReport): string {
   const sarif = {
@@ -17,6 +18,7 @@ export function formatSarif(report: BoardGuardReport): string {
               name: rule.title,
               shortDescription: { text: rule.title },
               fullDescription: { text: `${rule.title}. Maturity: ${rule.maturity}.` },
+              helpUri: `https://github.com/oaslananka-lab/boardguard/blob/main/docs/rules.md#${rule.id.toLowerCase()}`,
               help: { text: rule.remediation },
               properties: {
                 defaultSeverity: rule.defaultSeverity,
@@ -29,9 +31,12 @@ export function formatSarif(report: BoardGuardReport): string {
           ruleId: finding.ruleId,
           level: sarifLevel(finding.severity),
           message: { text: finding.message },
+          partialFingerprints: {
+            primaryLocationLineHash: fingerprint(finding.ruleId, finding.message, finding.locations.map((location) => `${location.path}:${location.line ?? 1}:${location.column ?? 1}`).join("|"))
+          },
           locations: finding.locations.length > 0 ? finding.locations.map((location) => ({
             physicalLocation: {
-              artifactLocation: { uri: location.path },
+              artifactLocation: { uri: normalizeUri(location.path) },
               region: {
                 startLine: location.line ?? 1,
                 startColumn: location.column ?? 1
@@ -43,6 +48,14 @@ export function formatSarif(report: BoardGuardReport): string {
     ]
   };
   return `${JSON.stringify(sarif, null, 2)}\n`;
+}
+
+function fingerprint(...parts: string[]): string {
+  return createHash("sha256").update(parts.join("\0")).digest("hex");
+}
+
+function normalizeUri(value: string): string {
+  return value.replace(/\\/g, "/").replace(/^\.\//, "");
 }
 
 function sarifLevel(severity: string): "error" | "warning" | "note" {

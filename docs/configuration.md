@@ -2,6 +2,8 @@
 
 `boardguard.yml` uses `version: 1`.
 
+The JSON Schema is available at `boardguard.schema.json`. Unknown top-level and critical nested keys are rejected so misspelled release or policy settings do not silently downgrade validation.
+
 Main sections:
 
 - `project`: explicit KiCad project and KiCad CLI requirement.

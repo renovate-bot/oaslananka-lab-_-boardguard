@@ -60,11 +60,30 @@ export async function loadConfig(scanRoot: string, configInput?: string): Promis
 
 export function validateConfig(config: BoardGuardConfig): string[] {
   const errors: string[] = [];
+  allowKeys(config as Record<string, unknown>, ["version", "project", "reports", "manufacturing", "bom", "firmware", "rules"], "config", errors);
   if (config.version !== undefined && config.version !== 1) {
     errors.push("version must be 1");
   }
+  if (config.project) {
+    allowKeys(config.project as Record<string, unknown>, ["path", "require_kicad_cli"], "project", errors);
+  }
+  if (config.reports) {
+    allowKeys(config.reports as Record<string, unknown>, ["json", "sarif", "markdown"], "reports", errors);
+  }
+  if (config.manufacturing) {
+    allowKeys(config.manufacturing as Record<string, unknown>, ["board_name", "revision", "output_dir", "expected_artifacts"], "manufacturing", errors);
+  }
+  if (config.bom) {
+    allowKeys(config.bom as Record<string, unknown>, ["input", "required_fields"], "bom", errors);
+  }
+  if (config.firmware) {
+    allowKeys(config.firmware as Record<string, unknown>, ["pinmap"], "firmware", errors);
+  }
   if (config.project?.path !== undefined && typeof config.project.path !== "string") {
     errors.push("project.path must be a string");
+  }
+  if (config.project?.require_kicad_cli !== undefined && typeof config.project.require_kicad_cli !== "boolean") {
+    errors.push("project.require_kicad_cli must be a boolean");
   }
   if (config.rules) {
     for (const [ruleId, severity] of Object.entries(config.rules)) {
@@ -77,6 +96,15 @@ export function validateConfig(config: BoardGuardConfig): string[] {
     }
   }
   return errors.sort();
+}
+
+function allowKeys(row: Record<string, unknown>, allowed: string[], prefix: string, errors: string[]): void {
+  const allowedSet = new Set(allowed);
+  for (const key of Object.keys(row)) {
+    if (!allowedSet.has(key)) {
+      errors.push(`${prefix}.${key} is not supported`);
+    }
+  }
 }
 
 export function configuredSeverity(config: BoardGuardConfig | undefined, ruleId: RuleId): SeverityName | "off" | undefined {

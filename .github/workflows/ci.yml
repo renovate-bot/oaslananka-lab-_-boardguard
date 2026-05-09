@@ -76,12 +76,22 @@ jobs:
           set -euo pipefail
           corepack pnpm run action:build
           node scripts/validate-action-metadata.mjs
+      - name: Package validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack pnpm run pack:check
       - name: CLI smoke test
         shell: bash
         run: |
           set -euo pipefail
-          node dist/cli/main.js version
+          corepack pnpm run cli:smoke
           node dist/cli/main.js scan --path tests/fixtures/projects/safe-basic --format json --kicad-cli tests/fixtures/missing-tools/kicad-cli-not-installed > boardguard-smoke.json
+      - name: Action smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack pnpm run action:smoke
       - name: Package content sanity
         shell: bash
         run: |

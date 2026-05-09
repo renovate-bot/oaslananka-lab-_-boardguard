@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oaslananka-lab/boardguard/raw/main/boardguard.schema.json",
+  "title": "BoardGuard configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "require_kicad_cli": { "type": "boolean" }
+      }
+    },
+    "reports": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "json": { "type": "boolean" },
+        "sarif": { "type": "boolean" },
+        "markdown": { "type": "boolean" }
+      }
+    },
+    "manufacturing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "board_name": { "type": "string" },
+        "revision": { "type": "string" },
+        "output_dir": { "type": "string" },
+        "expected_artifacts": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "bom": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input": { "type": "string" },
+        "required_fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "firmware": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pinmap": { "type": "string" }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": {
+        "enum": ["critical", "high", "medium", "low", "info", "error", "warning", "off"]
+      }
+    }
+  }
+}

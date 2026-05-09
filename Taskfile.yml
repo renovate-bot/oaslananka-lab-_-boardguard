@@ -23,6 +23,15 @@ tasks:
   action:build:
     cmds:
       - pnpm run action:build
+  action:smoke:
+    cmds:
+      - pnpm run action:smoke
+  cli:smoke:
+    cmds:
+      - pnpm run cli:smoke
+  pack:check:
+    cmds:
+      - pnpm run pack:check
   fixtures:
     cmds:
       - pnpm run fixtures
@@ -40,6 +49,9 @@ tasks:
       - pnpm run build
       - pnpm test
       - pnpm run action:build
+      - pnpm run pack:check
+      - pnpm run cli:smoke
+      - pnpm run action:smoke
       - pnpm run scan:fixtures
       - pnpm run security
       - pnpm run release:dry-run

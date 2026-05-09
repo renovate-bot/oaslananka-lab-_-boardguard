@@ -2,7 +2,7 @@
 
 BoardGuard is a local-first CLI and GitHub Action for KiCad hardware design review, CI validation, DRC/ERC preflight, BOM risk checks, manufacturing release preflight, and pull request reporting.
 
-It is the repository CI layer for hardware projects. KiCad Studio remains the local IDE and VS Code layer. KiCad MCP Pro remains the MCP execution layer. BoardGuard works by itself in v0.1 and does not require either integration.
+It is the repository CI layer for hardware projects. KiCad Studio remains the local IDE and VS Code layer. KiCad MCP Pro remains the MCP execution layer. BoardGuard works by itself and does not require either integration.
 
 The personal repository `oaslananka/boardguard` is the source/original content repository. The organization repository `oaslananka-lab/boardguard` carries byte-equivalent project contents and is the guarded CI/CD, release, support, and security boundary. Package and Action metadata point to the organization repository because public support, release automation, and validation run there.
 
@@ -14,7 +14,7 @@ pnpm install --frozen-lockfile
 pnpm run build
 ```
 
-The package exposes the `boardguard` command after build. The GitHub Action uses the committed `dist/index.js` bundle because JavaScript actions execute packaged repository code directly.
+The package exposes the `boardguard` command after build. The GitHub Action uses the committed `dist/index.cjs` bundle because JavaScript actions execute packaged repository code directly.
 
 ## CLI Quickstart
 
@@ -115,6 +115,8 @@ firmware:
   pinmap: firmware-pins.yml
 ```
 
+The configuration schema is published in `boardguard.schema.json`.
+
 ## Rules
 
 The first rule set includes project discovery, malformed design files, KiCad CLI availability, ERC/DRC failure handling, BOM metadata gaps, duplicate designators, manufacturing metadata, manufacturing output planning, and experimental pinmap consistency.
@@ -146,7 +148,10 @@ pnpm run typecheck
 pnpm run build
 pnpm test
 pnpm run action:build
+pnpm run pack:check
+pnpm run cli:smoke
+pnpm run action:smoke
 pnpm run scan:fixtures
 ```
 
-Release automation is prepared with release-please manifest mode. The initial version is `0.1.0`. No package registry, container registry, marketplace, or KiCad PCM publishing is enabled in v0.1.
+Release automation uses release-please manifest mode. Package version, changelog entries, and release tags are derived from Conventional Commit history and release-please state. No package registry, container registry, marketplace, or KiCad PCM publishing is enabled in the current release model.

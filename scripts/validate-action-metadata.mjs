@@ -40,8 +40,8 @@ for (const key of ["name", "description", "author", "branding", "inputs", "outpu
 if (action.runs?.using !== "node24") {
   failures.push("runs.using must be node24");
 }
-if (action.runs?.main !== "dist/index.js") {
-  failures.push("runs.main must be dist/index.js");
+if (action.runs?.main !== "dist/index.cjs") {
+  failures.push("runs.main must be dist/index.cjs");
 }
 for (const input of requiredInputs) {
   if (!action.inputs?.[input]) {
@@ -54,9 +54,9 @@ for (const output of requiredOutputs) {
   }
 }
 try {
-  await fs.access("dist/index.js");
+  await fs.access("dist/index.cjs");
 } catch {
-  failures.push("dist/index.js is missing; run pnpm run action:build");
+  failures.push("dist/index.cjs is missing; run pnpm run action:build");
 }
 if (failures.length > 0) {
   console.error(failures.join("\n"));

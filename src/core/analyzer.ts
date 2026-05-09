@@ -14,8 +14,9 @@ import { bomFindings } from "../rules/bom.js";
 import { manufacturingFindings, exportPlan } from "../rules/manufacturing.js";
 import { pinmapFindings } from "../rules/pinmap.js";
 import { makeFinding } from "./findings.js";
+import { boardGuardVersion } from "../generated/version.js";
 
-export const boardGuardVersion = "0.1.0";
+export { boardGuardVersion };
 
 export async function analyze(input: AnalyzeOptions): Promise<BoardGuardReport> {
   const scanRoot = path.resolve(input.path);

@@ -12,6 +12,12 @@ export interface ParsedCli {
 }
 
 export function parseArgs(argv: string[], cwd: string): ParsedCli {
+  if (argv[0] === "--help" || argv[0] === "-h") {
+    return defaultParsed("help", cwd);
+  }
+  if (argv[0] === "--version" || argv[0] === "-v") {
+    return defaultParsed("version", cwd);
+  }
   const command = (argv[0] ?? "help") as ParsedCli["command"];
   if (!["scan", "detect", "rules", "version", "help"].includes(command)) {
     throw new Error(`Unknown command: ${command}`);
@@ -93,6 +99,20 @@ export function parseArgs(argv: string[], cwd: string): ParsedCli {
     options.path = positionalPath;
   }
   return { command, options, format, outputs };
+}
+
+function defaultParsed(command: ParsedCli["command"], cwd: string): ParsedCli {
+  return {
+    command,
+    options: {
+      path: cwd,
+      mode: "warn",
+      requireKicad: false,
+      exportPlan: false
+    },
+    format: "markdown",
+    outputs: {}
+  };
 }
 
 function readOptionalPath(args: string[], index: number): string | undefined {

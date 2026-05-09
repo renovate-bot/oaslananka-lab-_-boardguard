@@ -24,7 +24,10 @@ export async function discoverProjects(rootInput: string, explicitProject?: stri
       projectFiles = [];
     }
   } else {
-    projectFiles = await listFiles(scanRoot, (file) => file.endsWith(".kicad_pro"));
+    projectFiles = await listFiles(scanRoot, (file) => file.endsWith(".kicad_pro"), {
+      allowedExtensions: [".kicad_pro"],
+      maxDepth: 8
+    });
   }
 
   projectFiles.sort((a, b) => a.localeCompare(b));
@@ -35,6 +38,9 @@ export async function discoverProjects(rootInput: string, explicitProject?: stri
     const designFiles = await listFiles(root, (file) => {
       const parent = path.dirname(file);
       return parent === root && (file.endsWith(".kicad_sch") || file.endsWith(".kicad_pcb"));
+    }, {
+      allowedExtensions: [".kicad_sch", ".kicad_pcb"],
+      maxDepth: 1
     });
     const schematicFiles = designFiles
       .filter((file) => file.endsWith(".kicad_sch"))

@@ -31,7 +31,12 @@ export interface ComponentRecord {
   manufacturer?: string;
   mpn?: string;
   sourcePath: string;
+  source: "schematic" | "bom";
   line?: number;
+  dnp?: boolean;
+  rawFields?: Record<string, string>;
+  rowQuantity?: number;
+  rowReferences?: string[];
 }
 
 export interface PinmapEntry {

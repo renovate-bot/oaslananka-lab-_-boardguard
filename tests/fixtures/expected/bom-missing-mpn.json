@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "tool": {
     "name": "boardguard",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "mode": "warn",
   "projectCount": 1,
@@ -24,39 +24,20 @@
     "drcStatus": "unavailable"
   },
   "counts": {
-    "total": 4,
+    "total": 3,
     "critical": 0,
-    "high": 1,
+    "high": 0,
     "medium": 3,
     "low": 0,
     "info": 0
   },
-  "maxSeverity": "high",
+  "maxSeverity": "medium",
   "findings": [
-    {
-      "ruleId": "BG-BOM-002",
-      "title": "duplicate component designator found",
-      "severity": "high",
-      "message": "Duplicate component designator R1 was found.",
-      "remediation": "Re-annotate or correct duplicated designators.",
-      "locations": [
-        {
-          "path": "bom-missing-mpn.kicad_sch",
-          "line": 4,
-          "column": 1
-        },
-        {
-          "path": "bom.csv",
-          "line": 2,
-          "column": 1
-        }
-      ]
-    },
     {
       "ruleId": "BG-BOM-001",
       "title": "component is missing manufacturer part metadata",
       "severity": "medium",
-      "message": "Component R1 is missing manufacturer or MPN metadata.",
+      "message": "Schematic component R1 is missing manufacturer or MPN metadata.",
       "remediation": "Add manufacturer and manufacturer part number metadata.",
       "locations": [
         {
@@ -70,7 +51,7 @@
       "ruleId": "BG-BOM-001",
       "title": "component is missing manufacturer part metadata",
       "severity": "medium",
-      "message": "Component R1 is missing manufacturer or MPN metadata.",
+      "message": "BOM row R1 is missing manufacturer or MPN metadata.",
       "remediation": "Add manufacturer and manufacturer part number metadata.",
       "locations": [
         {

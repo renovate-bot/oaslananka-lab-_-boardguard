@@ -57,12 +57,18 @@ function extractComponents(text: string, sourcePath: string): ComponentRecord[] 
         manufacturer: properties.get("manufacturer") ?? properties.get("mfr"),
         mpn: properties.get("mpn") ?? properties.get("manufacturer part number") ?? properties.get("mfr part number"),
         sourcePath,
-        line: lineForIndex(text, symbolStart)
+        source: "schematic",
+        line: lineForIndex(text, symbolStart),
+        dnp: isTruthy(properties.get("dnp") ?? properties.get("do not populate") ?? properties.get("exclude from bom"))
       });
     }
     index = symbolStart + symbolText.length;
   }
   return components.sort((a, b) => a.reference.localeCompare(b.reference));
+}
+
+function isTruthy(value: string | undefined): boolean {
+  return value !== undefined && /^(1|true|yes|y|dnp)$/i.test(value.trim());
 }
 
 function extractNetLabels(text: string): string[] {

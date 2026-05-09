@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/oaslananka-lab/boardguard#readme",
   "engines": {
-    "node": ">=24 <27"
+    "node": ">=24 <25"
   },
   "packageManager": "pnpm@11.0.8",
   "bin": {
@@ -27,7 +27,8 @@
     "README.md",
     "LICENSE",
     "SECURITY.md",
-    "action.yml"
+    "action.yml",
+    "boardguard.schema.json"
   ],
   "scripts": {
     "format": "node scripts/format-check.mjs --write",
@@ -36,7 +37,10 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.json",
     "action:build": "node scripts/build-action.mjs",
+    "action:smoke": "node scripts/smoke-action.mjs",
+    "cli:smoke": "node scripts/smoke-cli.mjs",
     "fixtures": "vitest run tests/boardguard.test.ts --run",
+    "pack:check": "node scripts/validate-pack.mjs",
     "scan:fixtures": "node scripts/validate-fixtures.mjs",
     "test": "vitest run",
     "security": "node scripts/lint.mjs --security",
@@ -48,7 +52,7 @@
     "yaml": "2.8.4"
   },
   "devDependencies": {
-    "@types/node": "25.6.2",
+    "@types/node": "24.12.3",
     "esbuild": "0.28.0",
     "tsx": "4.21.0",
     "typescript": "6.0.3",

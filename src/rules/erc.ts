@@ -10,7 +10,7 @@ export function ercFindings(root: string, checks: KicadCheckFinding[], config?: 
       ruleId: "BG-ERC-001",
       severity: configured === "off" ? "low" : configured,
       message: check.message,
-      locations: [{ path: normalizeRelative(root, check.path), line: 1, column: 1 }]
+      locations: [{ path: normalizeRelative(root, check.path), line: check.line ?? 1, column: check.column ?? 1 }]
     });
   }).filter((finding) => configuredSeverity(config, finding.ruleId) !== "off");
 }

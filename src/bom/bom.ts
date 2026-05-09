@@ -1,7 +1,7 @@
 import { readTextFile } from "../util/fs.js";
 import type { ComponentRecord } from "../core/types.js";
 import { parseCsv } from "./csv.js";
-import { footprintFields, manufacturerFields, mpnFields, pickField, referenceFields, valueFields } from "./fields.js";
+import { dnpFields, footprintFields, manufacturerFields, mpnFields, pickField, quantityFields, referenceFields, valueFields } from "./fields.js";
 
 export async function parseBomCsv(file: string): Promise<ComponentRecord[]> {
   const text = await readTextFile(file);
@@ -12,7 +12,9 @@ export async function parseBomCsv(file: string): Promise<ComponentRecord[]> {
     if (!reference) {
       return;
     }
-    for (const designator of splitDesignators(reference)) {
+    const designators = splitDesignators(reference);
+    const quantity = parseQuantity(pickField(row, quantityFields));
+    for (const designator of designators) {
       components.push({
         reference: designator,
         value: pickField(row, valueFields),
@@ -20,11 +22,28 @@ export async function parseBomCsv(file: string): Promise<ComponentRecord[]> {
         manufacturer: pickField(row, manufacturerFields),
         mpn: pickField(row, mpnFields),
         sourcePath: file,
-        line: index + 2
+        source: "bom",
+        line: index + 2,
+        dnp: isTruthy(pickField(row, dnpFields)),
+        rawFields: row,
+        rowQuantity: quantity,
+        rowReferences: designators
       });
     }
   });
   return components.sort((a, b) => a.reference.localeCompare(b.reference));
+}
+
+function parseQuantity(value: string | undefined): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function isTruthy(value: string | undefined): boolean {
+  return value !== undefined && /^(1|true|yes|y|dnp)$/i.test(value.trim());
 }
 
 function splitDesignators(value: string): string[] {
