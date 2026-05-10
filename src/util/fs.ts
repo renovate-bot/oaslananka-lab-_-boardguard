@@ -25,8 +25,29 @@ export interface ListFileOptions {
 const defaultListOptions = {
   maxDepth: 8,
   maxFiles: 10_000,
-  maxFileSizeBytes: 10 * 1024 * 1024
+  maxFileSizeBytes: Number.POSITIVE_INFINITY
 };
+
+const fileSizeLimits = new Map<string, number>([
+  [".kicad_pro", 2 * 1024 * 1024],
+  [".kicad_sch", 50 * 1024 * 1024],
+  [".kicad_pcb", 250 * 1024 * 1024],
+  [".csv", 50 * 1024 * 1024],
+  [".tsv", 50 * 1024 * 1024]
+]);
+
+const defaultReadLimitBytes = 10 * 1024 * 1024;
+
+export class FileTooLargeError extends Error {
+  constructor(
+    readonly file: string,
+    readonly size: number,
+    readonly limit: number
+  ) {
+    super(`${file} exceeds ${limit} byte limit for ${path.extname(file) || "this file type"}`);
+    this.name = "FileTooLargeError";
+  }
+}
 
 export async function pathExists(value: string): Promise<boolean> {
   try {
@@ -39,10 +60,29 @@ export async function pathExists(value: string): Promise<boolean> {
 
 export async function readTextFile(value: string): Promise<string> {
   const stat = await fs.stat(value);
-  if (stat.size > defaultListOptions.maxFileSizeBytes) {
-    throw new Error(`file exceeds ${defaultListOptions.maxFileSizeBytes} byte limit`);
+  const limit = fileSizeLimitForPath(value);
+  if (stat.size > limit) {
+    throw new FileTooLargeError(value, stat.size, limit);
   }
   return fs.readFile(value, "utf8");
+}
+
+export function fileSizeLimitForPath(value: string): number {
+  return fileSizeLimits.get(path.extname(value).toLowerCase()) ?? defaultReadLimitBytes;
+}
+
+export async function fileTooLarge(value: string): Promise<{ size: number; limit: number } | undefined> {
+  let stat;
+  try {
+    stat = await fs.stat(value);
+  } catch (error) {
+    if (isMissingPathError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
+  const limit = fileSizeLimitForPath(value);
+  return stat.size > limit ? { size: stat.size, limit } : undefined;
 }
 
 export async function writeTextFile(value: string, content: string): Promise<void> {
@@ -79,9 +119,18 @@ export async function listFiles(root: string, predicate: (file: string) => boole
         continue;
       }
       if (entry.isFile() && (!allowedExtensions || allowedExtensions.has(path.extname(entry.name))) && predicate(full)) {
-        const stat = await fs.stat(full);
-        if (stat.size > maxFileSizeBytes) {
-          continue;
+        if (Number.isFinite(maxFileSizeBytes)) {
+          try {
+            const stat = await fs.stat(full);
+            if (stat.size > maxFileSizeBytes) {
+              continue;
+            }
+          } catch (error) {
+            if (isMissingPathError(error)) {
+              continue;
+            }
+            throw error;
+          }
         }
         results.push(full);
       }
@@ -90,4 +139,9 @@ export async function listFiles(root: string, predicate: (file: string) => boole
 
   await walk(root, 0);
   return results;
+}
+
+function isMissingPathError(error: unknown): boolean {
+  const code = (error as NodeJS.ErrnoException | undefined)?.code;
+  return code === "ENOENT" || code === "ENOTDIR";
 }

@@ -4,6 +4,7 @@ import path from "node:path";
 import { pathExists } from "../util/fs.js";
 import { runProcess } from "../util/process.js";
 import { redactControlCharacters } from "../util/redaction.js";
+import type { BoardGuardConfig } from "../core/config.js";
 import type { CheckStatus, KicadCliResult, ProjectDiscovery } from "../core/types.js";
 
 export interface KicadCheckFinding {
@@ -21,7 +22,19 @@ export interface KicadRunResult {
   findings: KicadCheckFinding[];
 }
 
-export async function runKicadChecks(projects: ProjectDiscovery[], cliPathInput?: string): Promise<KicadRunResult> {
+const helpUnavailableMarker = "__BOARDGUARD_KICAD_HELP_UNAVAILABLE__";
+
+export async function runKicadChecks(projects: ProjectDiscovery[], cliPathInput?: string, options?: BoardGuardConfig["kicad"]): Promise<KicadRunResult> {
+  if (options?.enabled === false) {
+    return {
+      cli: {
+        found: false,
+        ercStatus: "skipped",
+        drcStatus: "skipped"
+      },
+      findings: []
+    };
+  }
   const detected = await detectKicadCli(cliPathInput);
   const cli: KicadCliResult = {
     found: detected.found,
@@ -35,6 +48,10 @@ export async function runKicadChecks(projects: ProjectDiscovery[], cliPathInput?
     return { cli, findings };
   }
 
+  const help = {
+    erc: await kicadHelp(detected.path, ["sch", "erc"]),
+    drc: await kicadHelp(detected.path, ["pcb", "drc"])
+  };
   let ercRan = false;
   let drcRan = false;
   let ercFailed = false;
@@ -42,13 +59,13 @@ export async function runKicadChecks(projects: ProjectDiscovery[], cliPathInput?
   for (const project of projects) {
     for (const schematic of project.schematicFiles) {
       ercRan = true;
-      const result = await runKicadReport(detected.path, ["sch", "erc"], schematic, "erc");
+      const result = await runKicadReport(detected.path, ["sch", "erc"], schematic, "erc", help.erc, options);
       ercFailed ||= result.status === "failed";
       findings.push(...result.findings);
     }
     for (const board of project.boardFiles) {
       drcRan = true;
-      const result = await runKicadReport(detected.path, ["pcb", "drc"], board, "drc");
+      const result = await runKicadReport(detected.path, ["pcb", "drc"], board, "drc", help.drc, options);
       drcFailed ||= result.status === "failed";
       findings.push(...result.findings);
     }
@@ -88,11 +105,13 @@ async function runKicadReport(
   cliPath: string,
   command: string[],
   inputFile: string,
-  kind: "erc" | "drc"
+  kind: "erc" | "drc",
+  helpText: string,
+  options: BoardGuardConfig["kicad"] | undefined
 ): Promise<{ status: CheckStatus; findings: KicadCheckFinding[] }> {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-"));
   const output = path.join(tempDir, `${kind}.json`);
-  const args = [...command, "--format", "json", "--output", output, "--exit-code-violations", inputFile];
+  const args = buildKicadReportArgs(command, output, inputFile, kind, helpText, options);
   const result = await runProcess(cliPath, args, { timeoutMs: 120_000, maxStdoutBytes: 128 * 1024, maxStderrBytes: 128 * 1024 });
   let reportText = "";
   try {
@@ -117,6 +136,47 @@ async function runKicadReport(
     status: "failed",
     findings: [{ kind, message: outputText || `KiCad ${kind.toUpperCase()} exited with code ${result.code ?? "unknown"}`, path: inputFile }]
   };
+}
+
+async function kicadHelp(cliPath: string, command: string[]): Promise<string> {
+  const result = await runProcess(cliPath, [...command, "--help"], { timeoutMs: 10_000, maxStdoutBytes: 128 * 1024, maxStderrBytes: 128 * 1024 });
+  const output = `${result.stdout}\n${result.stderr}`;
+  return result.code === 0 && !result.timedOut ? output : `${helpUnavailableMarker}\n${output}`;
+}
+
+function buildKicadReportArgs(
+  command: string[],
+  output: string,
+  inputFile: string,
+  kind: "erc" | "drc",
+  helpText: string,
+  options: BoardGuardConfig["kicad"] | undefined
+): string[] {
+  const args = [...command, "--format", "json", "--output", output, "--exit-code-violations"];
+  const checkOptions = kind === "erc" ? options?.erc : options?.drc;
+  if (checkOptions?.severity) {
+    pushSupported(args, helpText, `--severity-${checkOptions.severity}`);
+  }
+  if (checkOptions?.severity_exclusions === true) {
+    pushSupported(args, helpText, "--severity-exclusions");
+  }
+  if (kind === "drc") {
+    const drc = options?.drc;
+    if (drc?.schematic_parity === true) {
+      pushSupported(args, helpText, "--schematic-parity");
+    }
+    if (drc?.refill_zones === true) {
+      pushSupported(args, helpText, "--refill-zones");
+    }
+  }
+  args.push(inputFile);
+  return args;
+}
+
+function pushSupported(args: string[], helpText: string, flag: string): void {
+  if (helpText.includes(helpUnavailableMarker) || helpText.includes(flag)) {
+    args.push(flag);
+  }
 }
 
 export function normalizeKicadFindings(kind: "erc" | "drc", fallbackPath: string, reportText: string): KicadCheckFinding[] {

@@ -2,6 +2,7 @@
 .env.*
 !.env.example
 .npmrc
+doppler.yaml
 node_modules/
 coverage/
 build/
@@ -28,3 +29,6 @@ notes.local.md
 *.prompt.*
 *.scratch.*
 boardguard-results/
+**/boardguard.json
+**/boardguard.sarif
+**/boardguard.md

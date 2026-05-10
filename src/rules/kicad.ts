@@ -3,6 +3,9 @@ import { makeFinding, type Finding } from "../core/findings.js";
 import type { KicadCliResult } from "../core/types.js";
 
 export function kicadAvailabilityFindings(kicad: KicadCliResult, requireKicad: boolean, config?: BoardGuardConfig): Finding[] {
+  if (config?.kicad?.enabled === false) {
+    return [];
+  }
   if (kicad.found) {
     return [];
   }

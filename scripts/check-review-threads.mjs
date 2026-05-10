@@ -17,10 +17,14 @@ if (!pullNumber) {
 
 const [owner, name] = repository.split("/");
 const query = `
-query($owner: String!, $name: String!, $number: Int!) {
+query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
   repository(owner: $owner, name: $name) {
     pullRequest(number: $number) {
-      reviewThreads(first: 100) {
+      reviewThreads(first: 100, after: $cursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
         nodes {
           id
           isResolved
@@ -42,24 +46,22 @@ query($owner: String!, $name: String!, $number: Int!) {
   }
 }`;
 
-const response = await fetch("https://api.github.com/graphql", {
-  method: "POST",
-  headers: {
-    authorization: `Bearer ${token}`,
-    "content-type": "application/json",
-    "user-agent": "boardguard-review-thread-gate"
-  },
-  body: JSON.stringify({ query, variables: { owner, name, number: pullNumber } })
-});
-if (!response.ok) {
-  throw new Error(`GitHub GraphQL request failed: ${response.status}`);
+const threads = [];
+let cursor = null;
+const maxPages = 25;
+for (let page = 0; page < maxPages; page += 1) {
+  const payload = await graphql({ owner, name, number: pullNumber, cursor });
+  const connection = payload.data.repository.pullRequest.reviewThreads;
+  threads.push(...connection.nodes);
+  if (!connection.pageInfo.hasNextPage) {
+    cursor = null;
+    break;
+  }
+  cursor = connection.pageInfo.endCursor;
 }
-const payload = await response.json();
-if (payload.errors) {
-  throw new Error(JSON.stringify(payload.errors));
+if (cursor) {
+  throw new Error(`Review thread pagination exceeded ${maxPages} pages; refusing to ignore remaining threads.`);
 }
-
-const threads = payload.data.repository.pullRequest.reviewThreads.nodes;
 const blocking = [];
 for (const thread of threads) {
   if (thread.isResolved || thread.isOutdated) {
@@ -97,4 +99,32 @@ if (summaryPath) {
 process.stdout.write(`${markdown}\n`);
 if (blocking.length > 0) {
   process.exitCode = 1;
+}
+
+async function graphql(variables) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
+  let response;
+  try {
+    response = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "application/json",
+        "user-agent": "boardguard-review-thread-gate"
+      },
+      body: JSON.stringify({ query, variables }),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+  if (!response.ok) {
+    throw new Error(`GitHub GraphQL request failed: ${response.status}`);
+  }
+  const payload = await response.json();
+  if (payload.errors) {
+    throw new Error(JSON.stringify(payload.errors));
+  }
+  return payload;
 }

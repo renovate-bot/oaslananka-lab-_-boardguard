@@ -56,8 +56,52 @@
         "pinmap": { "type": "string" }
       }
     },
+    "kicad": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "min_version": { "type": "string" },
+        "drc": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "severity": { "enum": ["all", "error", "warning"] },
+            "schematic_parity": { "type": "boolean" },
+            "refill_zones": { "type": "boolean" },
+            "severity_exclusions": { "type": "boolean" }
+          }
+        },
+        "erc": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "severity": { "enum": ["all", "error", "warning"] },
+            "severity_exclusions": { "type": "boolean" }
+          }
+        }
+      }
+    },
     "rules": {
       "type": "object",
+      "propertyNames": {
+        "enum": [
+          "BG-CONFIG-001",
+          "BG-PROJ-001",
+          "BG-PROJ-002",
+          "BG-PROJ-003",
+          "BG-PROJ-004",
+          "BG-IO-TOO-LARGE",
+          "BG-KICAD-001",
+          "BG-ERC-001",
+          "BG-DRC-001",
+          "BG-BOM-001",
+          "BG-BOM-002",
+          "BG-MFG-001",
+          "BG-MFG-002",
+          "BG-PIN-001"
+        ]
+      },
       "additionalProperties": {
         "enum": ["critical", "high", "medium", "low", "info", "error", "warning", "off"]
       }

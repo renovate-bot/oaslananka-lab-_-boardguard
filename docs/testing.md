@@ -9,6 +9,7 @@ BoardGuard test layers:
 - Package layout validation through `scripts/validate-pack.mjs`.
 - CLI and installed package smoke testing through `scripts/smoke-cli.mjs`.
 - GitHub Action runtime smoke testing through `scripts/smoke-action.mjs`.
+- Release-state dry-run checks through `scripts/release-state.mjs --local`.
 - Local CI through `task ci` when Task is installed.
 
 KiCad-backed checks are optional. Static tests pass without KiCad installed. To test KiCad locally:

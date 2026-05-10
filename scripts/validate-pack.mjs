@@ -10,10 +10,11 @@ await requireFile("dist/index.cjs");
 await requireFile("README.md");
 await requireFile("LICENSE");
 await requireFile("SECURITY.md");
+await requireFile("action.yml");
 await requireFile("boardguard.schema.json");
 
-const cli = await fs.readFile("dist/cli/main.js", "utf8");
-if (!cli.startsWith("#!/usr/bin/env node")) {
+const cli = await readFileIfPresent("dist/cli/main.js");
+if (cli !== undefined && !cli.startsWith("#!/usr/bin/env node")) {
   failures.push("dist/cli/main.js must start with a Node shebang");
 }
 
@@ -24,14 +25,25 @@ if (packageJson.version !== manifest["."]) {
   failures.push("package.json version must match .release-please-manifest.json");
 }
 
-const versionModule = await fs.readFile("src/generated/version.ts", "utf8");
-if (!versionModule.includes(`"${packageJson.version}"`)) {
+const versionModule = await readFileIfPresent("src/generated/version.ts");
+if (versionModule === undefined) {
+  failures.push("src/generated/version.ts is missing");
+} else if (!versionModule.includes(`"${packageJson.version}"`)) {
   failures.push("src/generated/version.ts must match package.json version");
 }
 
 const packOutput = runCommand("npm", ["pack", "--dry-run", "--json"]);
-const [pack] = JSON.parse(packOutput);
-const files = new Set(pack.files.map((file) => file.path.replace(/\\/g, "/")));
+const files = new Set();
+if (packOutput) {
+  try {
+    const [pack] = JSON.parse(packOutput);
+    for (const file of pack.files) {
+      files.add(file.path.replace(/\\/g, "/"));
+    }
+  } catch (error) {
+    failures.push(`npm pack output could not be parsed: ${error instanceof Error ? error.message : "invalid JSON"}`);
+  }
+}
 const required = [
   "dist/cli/main.js",
   "dist/index.cjs",
@@ -43,7 +55,7 @@ const required = [
   "boardguard.schema.json"
 ];
 for (const file of required) {
-  if (!files.has(file)) {
+  if (files.size > 0 && !files.has(file)) {
     failures.push(`package tarball is missing ${file}`);
   }
 }
@@ -81,13 +93,22 @@ async function requireFile(file) {
   }
 }
 
+async function readFileIfPresent(file) {
+  try {
+    return await fs.readFile(file, "utf8");
+  } catch {
+    return undefined;
+  }
+}
+
 function runCommand(command, args) {
   const invocation = process.platform === "win32"
     ? { command: "cmd.exe", args: ["/d", "/c", command, ...args] }
     : { command, args };
   const result = spawnSync(invocation.command, invocation.args, { encoding: "utf8" });
   if (result.status !== 0) {
-    throw new Error(`${command} ${args.join(" ")} failed\n${result.stderr}`);
+    failures.push(`${command} ${args.join(" ")} failed\n${result.stderr}`);
+    return "";
   }
   return result.stdout;
 }

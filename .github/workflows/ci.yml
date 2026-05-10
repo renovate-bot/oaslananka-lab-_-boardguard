@@ -9,13 +9,17 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   validate:
-    name: Validate (${{ matrix.os }})
+    name: Validate (${{ matrix.os }}, Node ${{ matrix.node-version }})
     if: github.repository == 'oaslananka-lab/boardguard' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
@@ -23,6 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, macos-15, windows-2025]
+        node-version: [24.15.0, 26.1.0]
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -31,78 +36,79 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: 24.15.0
+          node-version: ${{ matrix.node-version }}
       - name: Install pnpm
-        shell: bash
         run: |
           set -euo pipefail
           corepack enable
-          corepack prepare pnpm@11.0.8 --activate
+          corepack prepare pnpm@11.0.9 --activate
           corepack pnpm --version
       - name: Install dependencies
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm install --frozen-lockfile
       - name: Format check
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm run format:check
       - name: Lint
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm run lint
       - name: Typecheck
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm run typecheck
       - name: Build
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm run build
       - name: Unit and fixture tests
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm test
           corepack pnpm run scan:fixtures
       - name: Action build
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm run action:build
           node scripts/validate-action-metadata.mjs
       - name: Package validation
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm run pack:check
       - name: CLI smoke test
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm run cli:smoke
-          node dist/cli/main.js scan --path tests/fixtures/projects/safe-basic --format json --kicad-cli tests/fixtures/missing-tools/kicad-cli-not-installed > boardguard-smoke.json
+          node dist/cli/main.js scan --path tests/fixtures/projects/safe-basic --config .boardguard-ci-missing.yml --format json --kicad-cli tests/fixtures/missing-tools/kicad-cli-not-installed > boardguard-smoke.json
       - name: Action smoke test
-        shell: bash
         run: |
           set -euo pipefail
           corepack pnpm run action:smoke
       - name: Package content sanity
-        shell: bash
         run: |
           set -euo pipefail
           mkdir -p boardguard-results
           corepack pnpm pack --pack-destination boardguard-results
+      - name: Upload coverage to Codecov
+        if: always() && matrix.os == 'ubuntu-24.04' && matrix.node-version == '24.15.0'
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4.6.0
+        continue-on-error: true
+        with:
+          fail_ci_if_error: false
+          flags: unit
+      - name: SonarQube Scan
+        if: matrix.os == 'ubuntu-24.04' && matrix.node-version == '24.15.0' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+        uses: SonarSource/sonarqube-scan-action@13990a695682794b53148ff9f6a8b6e22e43955e # v3.1.0
+        continue-on-error: true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Upload diagnostic artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: boardguard-ci-${{ matrix.os }}
+          name: boardguard-ci-${{ matrix.os }}-node-${{ matrix.node-version }}
           path: |
             boardguard-results/**
             boardguard-smoke.json

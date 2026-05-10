@@ -1,1 +1,6 @@
 * @oaslananka
+.github/ @oaslananka
+.github/workflows/ @oaslananka
+docs/ @oaslananka
+SECURITY.md @oaslananka
+release-please-config.json @oaslananka

@@ -8,6 +8,10 @@ permissions:
   contents: read
   pull-requests: read
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -27,7 +31,6 @@ jobs:
         with:
           node-version: 24.15.0
       - name: Check review threads
-        shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |

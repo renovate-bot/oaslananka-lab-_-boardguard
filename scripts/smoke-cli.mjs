@@ -31,6 +31,10 @@ try {
   if (installedVersion !== packageJson.version) {
     throw new Error(`Installed CLI version ${installedVersion} did not match package.json ${packageJson.version}`);
   }
+  const installedHelp = execPnpm(["exec", "boardguard", "--help"], { cwd: temp, encoding: "utf8" });
+  if (!installedHelp.includes("BoardGuard")) {
+    throw new Error("Installed CLI help output did not include BoardGuard");
+  }
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
 }

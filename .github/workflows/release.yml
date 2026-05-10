@@ -8,6 +8,10 @@ permissions:
   contents: read
   actions: read
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -41,6 +45,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
+      artifact-metadata: write
       actions: read
     steps:
       - name: Checkout
@@ -52,11 +57,10 @@ jobs:
         with:
           node-version: 24.15.0
       - name: Install and build
-        shell: bash
         run: |
           set -euo pipefail
           corepack enable
-          corepack prepare pnpm@11.0.8 --activate
+          corepack prepare pnpm@11.0.9 --activate
           corepack pnpm install --frozen-lockfile
           corepack pnpm run build
           corepack pnpm run action:build
@@ -64,7 +68,6 @@ jobs:
           corepack pnpm run cli:smoke
           corepack pnpm run action:smoke
       - name: Build release artifacts
-        shell: bash
         run: |
           set -euo pipefail
           mkdir -p boardguard-results
@@ -72,11 +75,10 @@ jobs:
           node scripts/generate-sbom.mjs boardguard-results/sbom.cdx.json
           (cd boardguard-results && sha256sum -- ./* > SHA256SUMS)
       - name: Attest release artifacts
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-path: boardguard-results/*
       - name: Upload release assets
-        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_PLEASE_TAG: ${{ needs.release-please.outputs.tag_name }}

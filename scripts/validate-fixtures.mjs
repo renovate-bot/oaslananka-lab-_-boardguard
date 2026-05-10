@@ -30,7 +30,9 @@ for (const fixture of fixtureNames) {
   if (await exists(pinmapPath)) {
     args.push("--pinmap", "firmware-pins.yml");
   }
+  await cleanupDefaultReports(fixturePath);
   const result = await run("node", args);
+  await cleanupDefaultReports(fixturePath);
   if (result.code !== 0) {
     failures.push(`${fixture}: scan exited ${result.code}\n${result.stderr}`);
     continue;
@@ -85,4 +87,12 @@ async function exists(file) {
 
 function missingKicadPath() {
   return path.join(root, "tests", "fixtures", "missing-tools", "kicad-cli-not-installed");
+}
+
+async function cleanupDefaultReports(directory) {
+  await Promise.all([
+    fs.rm(path.join(directory, "boardguard.json"), { force: true }),
+    fs.rm(path.join(directory, "boardguard.sarif"), { force: true }),
+    fs.rm(path.join(directory, "boardguard.md"), { force: true })
+  ]);
 }

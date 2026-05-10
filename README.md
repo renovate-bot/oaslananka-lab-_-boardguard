@@ -1,20 +1,25 @@
 # BoardGuard
 
+[![CI](https://github.com/oaslananka-lab/boardguard/actions/workflows/ci.yml/badge.svg)](https://github.com/oaslananka-lab/boardguard/actions/workflows/ci.yml)
+[![Release](https://github.com/oaslananka-lab/boardguard/actions/workflows/release.yml/badge.svg)](https://github.com/oaslananka-lab/boardguard/actions/workflows/release.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/oaslananka-lab/boardguard/badge)](https://securityscorecards.dev/viewer/?uri=github.com/oaslananka-lab/boardguard)
+[![License](https://img.shields.io/github/license/oaslananka-lab/boardguard)](LICENSE)
+
 BoardGuard is a local-first CLI and GitHub Action for KiCad hardware design review, CI validation, DRC/ERC preflight, BOM risk checks, manufacturing release preflight, and pull request reporting.
 
 It is the repository CI layer for hardware projects. KiCad Studio remains the local IDE and VS Code layer. KiCad MCP Pro remains the MCP execution layer. BoardGuard works by itself and does not require either integration.
 
-The personal repository `oaslananka/boardguard` is the source/original content repository. The organization repository `oaslananka-lab/boardguard` carries byte-equivalent project contents and is the guarded CI/CD, release, support, and security boundary. Package and Action metadata point to the organization repository because public support, release automation, and validation run there.
+The canonical repository is `oaslananka-lab/boardguard`. Package metadata, support links, release automation, and validation point to the organization repository because public CI/CD, release, support, and security gates run there.
 
 ## Install
 
 ```bash
-corepack prepare pnpm@11.0.8 --activate
+corepack prepare pnpm@11.0.9 --activate
 pnpm install --frozen-lockfile
 pnpm run build
 ```
 
-The package exposes the `boardguard` command after build. The GitHub Action uses the committed `dist/index.cjs` bundle because JavaScript actions execute packaged repository code directly.
+The package exposes the `boardguard` command from `dist/cli/main.js` after build. The GitHub Action uses the committed `dist/index.cjs` CommonJS bundle because JavaScript actions execute packaged repository code directly.
 
 ## CLI Quickstart
 
@@ -113,9 +118,28 @@ bom:
 
 firmware:
   pinmap: firmware-pins.yml
+
+kicad:
+  enabled: true
+  min_version: "10.0.0"
+  drc:
+    severity: all
+    schematic_parity: true
+    refill_zones: true
+    severity_exclusions: true
+  erc:
+    severity: all
+    severity_exclusions: true
+
+rules:
+  BG-PROJ-001: error
+  BG-KICAD-001: warning
+  BG-BOM-001: warning
+  BG-MFG-001: warning
+  BG-PIN-001: error
 ```
 
-The configuration schema is published in `boardguard.schema.json`.
+The configuration schema is published in `boardguard.schema.json`. Output precedence is CLI flags, then GitHub Action inputs, then `boardguard.yml`, then defaults. A rule value of `off` suppresses that rule; `error` maps to high severity and `warning` maps to medium severity.
 
 ## Rules
 
@@ -130,6 +154,8 @@ BoardGuard writes deterministic JSON, SARIF 2.1.0, and Markdown summaries. SARIF
 ## KiCad CLI Behavior
 
 BoardGuard detects `kicad-cli`, supports an explicit CLI path, runs `version`, and invokes ERC/DRC with argument arrays and timeouts. If KiCad CLI is unavailable, checks are skipped unless `require-kicad` is true.
+
+When configured, BoardGuard probes `kicad-cli ... --help` before adding newer KiCad DRC/ERC flags such as `--severity-all`, `--severity-exclusions`, `--schematic-parity`, and `--refill-zones`. This lets KiCad 9 installations run with their supported flags while allowing stricter KiCad 10 checks when available.
 
 ## Security and Privacy
 
@@ -152,6 +178,7 @@ pnpm run pack:check
 pnpm run cli:smoke
 pnpm run action:smoke
 pnpm run scan:fixtures
+pnpm run release:dry-run
 ```
 
-Release automation uses release-please manifest mode. Package version, changelog entries, and release tags are derived from Conventional Commit history and release-please state. No package registry, container registry, marketplace, or KiCad PCM publishing is enabled in the current release model.
+Release automation uses release-please manifest mode. Package version, changelog entries, and release tags are derived from Conventional Commit history and release-please state. Release assets are built on GitHub Actions, with package validation, smoke tests, checksums, SBOM generation, and artifact attestations. No package registry, container registry, marketplace, or KiCad PCM publishing is enabled in the current release model.

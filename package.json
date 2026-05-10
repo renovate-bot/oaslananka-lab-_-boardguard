@@ -14,9 +14,9 @@
   },
   "homepage": "https://github.com/oaslananka-lab/boardguard#readme",
   "engines": {
-    "node": ">=24 <25"
+    "node": ">=24 <27"
   },
-  "packageManager": "pnpm@11.0.8",
+  "packageManager": "pnpm@11.0.9",
   "bin": {
     "boardguard": "./dist/cli/main.js"
   },
@@ -52,6 +52,7 @@
     "yaml": "2.8.4"
   },
   "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "4.2.1",
     "@types/node": "24.12.3",
     "esbuild": "0.28.0",
     "tsx": "4.21.0",

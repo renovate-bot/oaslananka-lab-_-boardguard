@@ -12,6 +12,7 @@ import { formatJson } from "../src/report/json.js";
 import { formatMarkdown } from "../src/report/markdown.js";
 import { formatSarif } from "../src/report/sarif.js";
 import { runCli } from "../src/cli/main.js";
+import { parseArgs } from "../src/cli/args.js";
 import { parseSchematic } from "../src/kicad/schematic.js";
 import { parseSExpression } from "../src/kicad/sexpr.js";
 import { runProcess } from "../src/util/process.js";
@@ -69,6 +70,10 @@ describe("configuration and metadata", () => {
     expect(validateConfig({ version: 1, rules: { "BG-PROJ-001": "error" } })).toEqual([]);
     expect(validateConfig({ version: 2 })).toContain("version must be 1");
     expect(validateConfig({ version: 1, unexpected: true } as never)).toContain("config.unexpected is not supported");
+    expect(validateConfig({ version: 1, rules: { "BG-NOPE-001": "off" } } as never)).toContain("rules.BG-NOPE-001 is not a known BoardGuard rule");
+    expect(validateConfig({ version: 1, project: false } as never)).toContain("project must be an object");
+    expect(validateConfig({ version: 1, reports: 0 } as never)).toContain("reports must be an object");
+    expect(validateConfig({ version: 1, kicad: { drc: false } } as never)).toContain("kicad.drc must be an object");
   });
 
   it("reports invalid BoardGuard configuration with a dedicated rule", async () => {
@@ -76,6 +81,39 @@ describe("configuration and metadata", () => {
     await fs.writeFile(path.join(temp, "boardguard.yml"), "version: 2\n", "utf8");
     const report = await analyze(baseOptions(temp));
     expect(report.findings.some((finding) => finding.ruleId === "BG-CONFIG-001")).toBe(true);
+  });
+
+  it("does not report KiCad unavailable when KiCad checks are disabled", async () => {
+    const temp = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-kicad-disabled-"));
+    await fs.writeFile(path.join(temp, "boardguard.yml"), "version: 1\nkicad:\n  enabled: false\n", "utf8");
+    const report = await analyze(baseOptions(temp));
+    expect(report.kicad.ercStatus).toBe("skipped");
+    expect(report.kicad.drcStatus).toBe("skipped");
+    expect(report.findings.some((finding) => finding.ruleId === "BG-KICAD-001")).toBe(false);
+  });
+
+  it("suppresses disabled rules and applies severity overrides", async () => {
+    const baselineRoot = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-rule-baseline-"));
+    await fs.writeFile(path.join(baselineRoot, "boardguard.yml"), "version: 1\n", "utf8");
+    const baselineReport = await analyze(baseOptions(baselineRoot));
+    expect(baselineReport.findings.some((finding) => finding.ruleId === "BG-PROJ-001")).toBe(true);
+    expect(baselineReport.findings.some((finding) => finding.ruleId === "BG-MFG-001")).toBe(true);
+
+    const offRoot = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-rule-off-"));
+    await fs.writeFile(path.join(offRoot, "boardguard.yml"), "version: 1\nrules:\n  BG-PROJ-001: off\n  BG-MFG-001: off\n", "utf8");
+    const offReport = await analyze(baseOptions(offRoot));
+    expect(offReport.findings.some((finding) => finding.ruleId === "BG-PROJ-001")).toBe(false);
+    expect(offReport.findings.some((finding) => finding.ruleId === "BG-MFG-001")).toBe(false);
+
+    const overrideRoot = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-rule-override-"));
+    await fs.cp(path.join(fixtureRoot, "missing-board"), overrideRoot, { recursive: true });
+    await fs.appendFile(path.join(overrideRoot, "boardguard.yml"), "rules:\n  BG-PROJ-003: warning\n", "utf8");
+    const overrideReport = await analyze(baseOptions(overrideRoot));
+    const overridden = overrideReport.findings.find((finding) => finding.ruleId === "BG-PROJ-003");
+    expect(overridden?.severity).toBe("medium");
+
+    const defaultReport = await scanFixture("missing-board");
+    expect(defaultReport.findings.find((finding) => finding.ruleId === "BG-PROJ-003")?.severity).toBe("high");
   });
 
   it("validates pinmap schema", () => {
@@ -206,6 +244,44 @@ describe("reports and CLI behavior", () => {
     expect(await runCli(["version"], process.cwd(), versionStreams as never)).toBe(0);
     expect(versionStreams.stdoutText()).toBe(`${packageJson.version}\n`);
   });
+
+  it("does not consume positional scan paths as optional report destinations", () => {
+    const parsed = parseArgs(["scan", "--json", "repo-dir"], "/work");
+    expect(parsed.options.path).toBe("repo-dir");
+    expect(parsed.outputs.json).toEqual({ requested: true });
+
+    const relativePath = parseArgs(["scan", "--json", "./my-project"], "/work");
+    expect(relativePath.options.path).toBe("./my-project");
+    expect(relativePath.outputs.json).toEqual({ requested: true });
+
+    const explicitPath = parseArgs(["scan", "--json=reports/boardguard.json", "repo-dir"], "/work");
+    expect(explicitPath.options.path).toBe("repo-dir");
+    expect(explicitPath.outputs.json).toEqual({ requested: true, path: "reports/boardguard.json" });
+  });
+
+  it("uses report config and lets CLI flags override report defaults", async () => {
+    const temp = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-reports-"));
+    await fs.cp(path.join(fixtureRoot, "safe-basic"), temp, { recursive: true });
+    expect(await runCli(["scan", "--path", temp, "--kicad-cli", missingKicad], process.cwd(), memoryStreams())).toBe(0);
+    await expectFile(path.join(temp, "boardguard.json"));
+    await expectFile(path.join(temp, "boardguard.sarif"));
+    await expectFile(path.join(temp, "boardguard.md"));
+
+    await fs.rm(path.join(temp, "boardguard.json"), { force: true });
+    await fs.rm(path.join(temp, "boardguard.sarif"), { force: true });
+    await fs.rm(path.join(temp, "boardguard.md"), { force: true });
+    await fs.writeFile(path.join(temp, "boardguard.yml"), `${completeConfig("safe-basic")}
+reports:
+  json: false
+  sarif: false
+  markdown: false
+`, "utf8");
+    expect(await runCli(["scan", "--path", temp, "--json", "custom-report.json", "--kicad-cli", missingKicad], process.cwd(), memoryStreams())).toBe(0);
+    await expectFile(path.join(temp, "custom-report.json"));
+    await expectMissing(path.join(temp, "boardguard.json"));
+    await expectMissing(path.join(temp, "boardguard.sarif"));
+    await expectMissing(path.join(temp, "boardguard.md"));
+  });
 });
 
 describe("action inputs and process hardening", () => {
@@ -260,6 +336,27 @@ describe("bounded file scanning and KiCad normalization", () => {
     await fs.writeFile(path.join(temp, "node_modules", "ignored.kicad_pro"), "{}", "utf8");
     const files = await listFiles(temp, (file) => file.endsWith(".kicad_pro"), { allowedExtensions: [".kicad_pro"] });
     expect(files.map((file) => path.basename(file))).toEqual(["a.kicad_pro"]);
+  });
+
+  it("does not treat large but allowed PCB files as missing or malformed", async () => {
+    const temp = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-large-pcb-"));
+    await fs.writeFile(path.join(temp, "large.kicad_pro"), JSON.stringify({ meta: { version: 1 } }), "utf8");
+    await fs.writeFile(path.join(temp, "large.kicad_sch"), schematic("R1", "R2"), "utf8");
+    const padding = " ".repeat(11 * 1024 * 1024);
+    await fs.writeFile(path.join(temp, "large.kicad_pcb"), `(kicad_pcb\n${padding}\n)`, "utf8");
+    const report = await analyze(baseOptions(temp));
+    expect(report.projects[0].boardFiles).toEqual(["large.kicad_pcb"]);
+    expect(report.findings.some((finding) => finding.ruleId === "BG-IO-TOO-LARGE")).toBe(false);
+    expect(report.findings.some((finding) => finding.ruleId === "BG-PROJ-003")).toBe(false);
+    expect(report.findings.some((finding) => finding.ruleId === "BG-PROJ-004")).toBe(false);
+  });
+
+  it("reports over-limit files with BG-IO-TOO-LARGE", async () => {
+    const temp = await fs.mkdtemp(path.join(os.tmpdir(), "boardguard-too-large-"));
+    await fs.writeFile(path.join(temp, "too-large.kicad_pro"), `${" ".repeat((2 * 1024 * 1024) + 1)}`, "utf8");
+    const report = await analyze(baseOptions(temp));
+    expect(report.findings.some((finding) => finding.ruleId === "BG-IO-TOO-LARGE")).toBe(true);
+    expect(report.findings.some((finding) => finding.ruleId === "BG-PROJ-004")).toBe(false);
   });
 
   it("normalizes KiCad JSON diagnostics into individual findings", () => {
@@ -332,6 +429,15 @@ function restoreEnv(key: string, value: string | undefined): void {
   } else {
     process.env[key] = value;
   }
+}
+
+async function expectFile(file: string): Promise<void> {
+  const stat = await fs.stat(file);
+  expect(stat.isFile()).toBe(true);
+}
+
+async function expectMissing(file: string): Promise<void> {
+  await expect(fs.stat(file)).rejects.toMatchObject({ code: "ENOENT" });
 }
 
 function completeConfig(name: string): string {

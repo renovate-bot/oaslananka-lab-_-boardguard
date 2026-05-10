@@ -1,0 +1,30 @@
+name: Stale
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    if: github.repository == 'oaslananka-lab/boardguard'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9.1.0
+        with:
+          stale-issue-message: "This issue has been inactive for 90 days and is marked stale."
+          stale-pr-message: "This PR has been inactive for 60 days and is marked stale."
+          close-issue-message: "Closing due to inactivity."
+          close-pr-message: "Closing PR due to inactivity."
+          days-before-issue-stale: 90
+          days-before-pr-stale: 60
+          days-before-close: 14
+          stale-issue-label: stale
+          stale-pr-label: stale
+          exempt-issue-labels: security,release,ops
+          exempt-pr-labels: security,release,ops

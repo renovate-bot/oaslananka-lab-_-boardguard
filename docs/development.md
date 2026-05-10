@@ -2,8 +2,8 @@
 
 Prerequisites:
 
-- Node.js 24 LTS
-- pnpm 11 through Corepack
+- Node.js 24 LTS for the Action runtime, with CI compatibility coverage for Node 26 Current
+- pnpm 11.0.9 through Corepack
 - Optional `kicad-cli` for KiCad-backed ERC/DRC checks
 - Optional Task for `Taskfile.yml`
 
@@ -18,6 +18,10 @@ pnpm run build
 pnpm test
 pnpm run action:build
 pnpm run scan:fixtures
+pnpm run pack:check
+pnpm run cli:smoke
+pnpm run action:smoke
+pnpm run release:dry-run
 ```
 
 Add a rule by updating `src/core/findings.ts`, adding detection in `src/rules`, documenting it in `docs/rules.md`, adding unit coverage, and adding or updating fixtures when useful.

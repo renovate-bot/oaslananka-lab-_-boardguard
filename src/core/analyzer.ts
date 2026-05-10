@@ -1,5 +1,6 @@
+import fs from "node:fs/promises";
 import path from "node:path";
-import { loadConfig } from "./config.js";
+import { loadConfig, type LoadedConfig } from "./config.js";
 import { discoverProjects } from "./discovery.js";
 import type { AnalyzeOptions, BoardGuardReport, ReportCounts } from "./types.js";
 import type { Finding } from "./findings.js";
@@ -19,13 +20,18 @@ import { boardGuardVersion } from "../generated/version.js";
 export { boardGuardVersion };
 
 export async function analyze(input: AnalyzeOptions): Promise<BoardGuardReport> {
-  const scanRoot = path.resolve(input.path);
+  const scanRoot = await canonicalScanRoot(input.path);
   const loadedConfig = await loadConfig(scanRoot, input.config);
+  return analyzeWithLoadedConfig(input, loadedConfig, scanRoot);
+}
+
+export async function analyzeWithLoadedConfig(input: AnalyzeOptions, loadedConfig: LoadedConfig, canonicalRoot?: string): Promise<BoardGuardReport> {
+  const scanRoot = canonicalRoot ?? await canonicalScanRoot(input.path);
   const config = loadedConfig.config;
   const configuredProject = input.project || config?.project?.path;
   const requireKicad = input.requireKicad || config?.project?.require_kicad_cli === true;
   const discovery = await discoverProjects(scanRoot, configuredProject);
-  const kicad = await runKicadChecks(discovery.projects, input.kicadCli);
+  const kicad = await runKicadChecks(discovery.projects, input.kicadCli, config?.kicad);
 
   const findings: Finding[] = [];
   for (const error of loadedConfig.errors) {
@@ -68,7 +74,7 @@ export async function analyze(input: AnalyzeOptions): Promise<BoardGuardReport> 
     projects: normalizedProjects,
     kicad: {
       found: kicad.cli.found,
-      path: kicad.cli.found ? "kicad-cli" : undefined,
+      path: kicad.cli.path,
       version: kicad.cli.version,
       ercStatus: kicad.cli.ercStatus,
       drcStatus: kicad.cli.drcStatus
@@ -78,6 +84,15 @@ export async function analyze(input: AnalyzeOptions): Promise<BoardGuardReport> 
     findings: normalizedFindings,
     exportPlan: input.exportPlan ? exportPlan(config) : undefined
   };
+}
+
+export async function canonicalScanRoot(inputPath: string): Promise<string> {
+  const resolved = path.resolve(inputPath);
+  try {
+    return await fs.realpath(resolved);
+  } catch {
+    return resolved;
+  }
 }
 
 export function shouldFail(report: BoardGuardReport, requireKicad = false): boolean {

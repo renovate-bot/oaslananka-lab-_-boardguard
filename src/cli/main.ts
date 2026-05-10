@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { analyze, boardGuardVersion, shouldFail } from "../core/analyzer.js";
+import { analyzeWithLoadedConfig, boardGuardVersion, canonicalScanRoot, shouldFail } from "../core/analyzer.js";
+import { loadConfig } from "../core/config.js";
 import { ruleDefinitions } from "../core/findings.js";
+import type { ReportFormat } from "../core/types.js";
 import { formatJson } from "../report/json.js";
 import { formatMarkdown } from "../report/markdown.js";
 import { formatSarif } from "../report/sarif.js";
 import { writeTextFile } from "../util/fs.js";
-import { parseArgs } from "./args.js";
+import { parseArgs, type ParsedCli } from "./args.js";
 
 export async function runCli(argv: string[], cwd: string, streams = { stdout: process.stdout, stderr: process.stderr }): Promise<number> {
   let parsed;
@@ -32,15 +34,19 @@ export async function runCli(argv: string[], cwd: string, streams = { stdout: pr
     return 0;
   }
 
-  const report = await analyze(parsed.command === "detect" ? { ...parsed.options, mode: "warn", requireKicad: false } : parsed.options);
-  if (parsed.outputs.json) {
-    await writeTextFile(path.resolve(parsed.options.path, parsed.outputs.json), formatJson(report));
+  const scanOptions = parsed.command === "detect" ? { ...parsed.options, mode: "warn" as const, requireKicad: false } : parsed.options;
+  const scanRoot = await canonicalScanRoot(scanOptions.path);
+  const loadedConfig = await loadConfig(scanRoot, scanOptions.config);
+  const report = await analyzeWithLoadedConfig(scanOptions, loadedConfig, scanRoot);
+  const outputTargets = reportOutputTargets(parsed, loadedConfig.config, scanRoot);
+  if (outputTargets.json) {
+    await writeTextFile(outputTargets.json, formatJson(report));
   }
-  if (parsed.outputs.sarif) {
-    await writeTextFile(path.resolve(parsed.options.path, parsed.outputs.sarif), formatSarif(report));
+  if (outputTargets.sarif) {
+    await writeTextFile(outputTargets.sarif, formatSarif(report));
   }
-  if (parsed.outputs.markdown) {
-    await writeTextFile(path.resolve(parsed.options.path, parsed.outputs.markdown), formatMarkdown(report));
+  if (outputTargets.markdown) {
+    await writeTextFile(outputTargets.markdown, formatMarkdown(report));
   }
 
   if (parsed.command === "detect") {
@@ -58,6 +64,25 @@ export async function runCli(argv: string[], cwd: string, streams = { stdout: pr
   return shouldFail(report, parsed.options.requireKicad) ? 1 : 0;
 }
 
+function reportOutputTargets(parsed: ParsedCli, config: Awaited<ReturnType<typeof loadConfig>>["config"], scanRoot: string): Partial<Record<ReportFormat, string>> {
+  const targets: Partial<Record<ReportFormat, string>> = {};
+  for (const format of ["json", "sarif", "markdown"] as const) {
+    const cliFlag = parsed.outputs[format];
+    if (cliFlag?.requested) {
+      targets[format] = path.resolve(scanRoot, cliFlag.path ?? defaultReportFile(format));
+      continue;
+    }
+    if (config?.reports?.[format] === true) {
+      targets[format] = path.resolve(scanRoot, defaultReportFile(format));
+    }
+  }
+  return targets;
+}
+
+function defaultReportFile(format: ReportFormat): string {
+  return format === "sarif" ? "boardguard.sarif" : `boardguard.${format === "markdown" ? "md" : "json"}`;
+}
+
 function helpText(): string {
   return `BoardGuard ${boardGuardVersion}
 
@@ -73,9 +98,9 @@ Options:
   --project <file>           Explicit .kicad_pro file.
   --config <file>            boardguard.yml path.
   --format <format>          markdown, json, or sarif.
-  --json [file]              Write JSON report when a file is provided.
-  --sarif [file]             Write SARIF report when a file is provided.
-  --markdown [file]          Write Markdown report when a file is provided.
+  --json [file]              Write JSON report. Defaults to boardguard.json.
+  --sarif [file]             Write SARIF report. Defaults to boardguard.sarif.
+  --markdown [file]          Write Markdown report. Defaults to boardguard.md.
   --mode <mode>              warn or enforce.
   --require-kicad <bool>     Require kicad-cli.
   --kicad-cli <path>         Explicit kicad-cli path.

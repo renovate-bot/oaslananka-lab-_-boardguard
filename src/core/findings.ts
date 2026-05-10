@@ -6,6 +6,7 @@ export type RuleId =
   | "BG-PROJ-002"
   | "BG-PROJ-003"
   | "BG-PROJ-004"
+  | "BG-IO-TOO-LARGE"
   | "BG-KICAD-001"
   | "BG-ERC-001"
   | "BG-DRC-001"
@@ -72,6 +73,13 @@ export const ruleDefinitions: Record<RuleId, RuleDefinition> = {
     title: "KiCad design file appears malformed or unreadable",
     defaultSeverity: "high",
     remediation: "Open and save the project in KiCad or restore the valid file.",
+    maturity: "implemented"
+  },
+  "BG-IO-TOO-LARGE": {
+    id: "BG-IO-TOO-LARGE",
+    title: "design input exceeds BoardGuard safety limits",
+    defaultSeverity: "high",
+    remediation: "Reduce the file size or raise support for this file type before relying on BoardGuard results.",
     maturity: "implemented"
   },
   "BG-KICAD-001": {

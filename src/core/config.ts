@@ -4,7 +4,7 @@ import { pathExists, readTextFile } from "../util/fs.js";
 import { resolveFrom } from "../util/paths.js";
 import type { ManufacturingPlan } from "./types.js";
 import { isSeverityName, type SeverityName } from "./severities.js";
-import type { RuleId } from "./findings.js";
+import { ruleDefinitions, type Finding, type RuleId } from "./findings.js";
 
 export interface BoardGuardConfig {
   version?: number;
@@ -29,6 +29,20 @@ export interface BoardGuardConfig {
   };
   firmware?: {
     pinmap?: string;
+  };
+  kicad?: {
+    enabled?: boolean;
+    min_version?: string;
+    drc?: {
+      severity?: "all" | "error" | "warning";
+      schematic_parity?: boolean;
+      refill_zones?: boolean;
+      severity_exclusions?: boolean;
+    };
+    erc?: {
+      severity?: "all" | "error" | "warning";
+      severity_exclusions?: boolean;
+    };
   };
   rules?: Partial<Record<RuleId, SeverityName | "error" | "warning" | "off">>;
 }
@@ -60,33 +74,128 @@ export async function loadConfig(scanRoot: string, configInput?: string): Promis
 
 export function validateConfig(config: BoardGuardConfig): string[] {
   const errors: string[] = [];
-  allowKeys(config as Record<string, unknown>, ["version", "project", "reports", "manufacturing", "bom", "firmware", "rules"], "config", errors);
-  if (config.version !== undefined && config.version !== 1) {
+  if (!isPlainObject(config)) {
+    return ["configuration must be an object"];
+  }
+
+  const root = config as Record<string, unknown>;
+  allowKeys(root, ["version", "project", "reports", "manufacturing", "bom", "firmware", "kicad", "rules"], "config", errors);
+  if (root.version !== undefined && root.version !== 1) {
     errors.push("version must be 1");
   }
-  if (config.project) {
-    allowKeys(config.project as Record<string, unknown>, ["path", "require_kicad_cli"], "project", errors);
+
+  const project = root.project;
+  if (project !== undefined) {
+    if (!isPlainObject(project)) {
+      errors.push("project must be an object");
+    } else {
+      allowKeys(project, ["path", "require_kicad_cli"], "project", errors);
+      validateOptionalString(project.path, "project.path", errors);
+      validateOptionalBoolean(project.require_kicad_cli, "project.require_kicad_cli", errors);
+    }
   }
-  if (config.reports) {
-    allowKeys(config.reports as Record<string, unknown>, ["json", "sarif", "markdown"], "reports", errors);
+
+  const reports = root.reports;
+  if (reports !== undefined) {
+    if (!isPlainObject(reports)) {
+      errors.push("reports must be an object");
+    } else {
+      allowKeys(reports, ["json", "sarif", "markdown"], "reports", errors);
+      validateOptionalBoolean(reports.json, "reports.json", errors);
+      validateOptionalBoolean(reports.sarif, "reports.sarif", errors);
+      validateOptionalBoolean(reports.markdown, "reports.markdown", errors);
+    }
   }
-  if (config.manufacturing) {
-    allowKeys(config.manufacturing as Record<string, unknown>, ["board_name", "revision", "output_dir", "expected_artifacts"], "manufacturing", errors);
+
+  const manufacturing = root.manufacturing;
+  if (manufacturing !== undefined) {
+    if (!isPlainObject(manufacturing)) {
+      errors.push("manufacturing must be an object");
+    } else {
+      allowKeys(manufacturing, ["board_name", "revision", "output_dir", "expected_artifacts"], "manufacturing", errors);
+      validateOptionalString(manufacturing.board_name, "manufacturing.board_name", errors);
+      validateOptionalString(manufacturing.revision, "manufacturing.revision", errors);
+      validateOptionalString(manufacturing.output_dir, "manufacturing.output_dir", errors);
+      if (manufacturing.expected_artifacts !== undefined) {
+        if (!isPlainObject(manufacturing.expected_artifacts)) {
+          errors.push("manufacturing.expected_artifacts must be an object");
+        } else {
+          for (const [key, value] of Object.entries(manufacturing.expected_artifacts)) {
+            if (typeof value !== "boolean") {
+              errors.push(`manufacturing.expected_artifacts.${key} must be a boolean`);
+            }
+          }
+        }
+      }
+    }
   }
-  if (config.bom) {
-    allowKeys(config.bom as Record<string, unknown>, ["input", "required_fields"], "bom", errors);
+
+  const bom = root.bom;
+  if (bom !== undefined) {
+    if (!isPlainObject(bom)) {
+      errors.push("bom must be an object");
+    } else {
+      allowKeys(bom, ["input", "required_fields"], "bom", errors);
+      validateOptionalString(bom.input, "bom.input", errors);
+      if (bom.required_fields !== undefined && (!Array.isArray(bom.required_fields) || bom.required_fields.some((entry) => typeof entry !== "string" || entry.trim() === ""))) {
+        errors.push("bom.required_fields must be an array of non-empty strings");
+      }
+    }
   }
-  if (config.firmware) {
-    allowKeys(config.firmware as Record<string, unknown>, ["pinmap"], "firmware", errors);
+
+  const firmware = root.firmware;
+  if (firmware !== undefined) {
+    if (!isPlainObject(firmware)) {
+      errors.push("firmware must be an object");
+    } else {
+      allowKeys(firmware, ["pinmap"], "firmware", errors);
+      validateOptionalString(firmware.pinmap, "firmware.pinmap", errors);
+    }
   }
-  if (config.project?.path !== undefined && typeof config.project.path !== "string") {
-    errors.push("project.path must be a string");
+
+  const kicad = root.kicad;
+  if (kicad !== undefined) {
+    if (!isPlainObject(kicad)) {
+      errors.push("kicad must be an object");
+    } else {
+      allowKeys(kicad, ["enabled", "min_version", "drc", "erc"], "kicad", errors);
+      validateOptionalBoolean(kicad.enabled, "kicad.enabled", errors);
+      validateOptionalString(kicad.min_version, "kicad.min_version", errors);
+      if (kicad.drc !== undefined) {
+        if (!isPlainObject(kicad.drc)) {
+          errors.push("kicad.drc must be an object");
+        } else {
+          allowKeys(kicad.drc, ["severity", "schematic_parity", "refill_zones", "severity_exclusions"], "kicad.drc", errors);
+          validateSeveritySelector(kicad.drc.severity, "kicad.drc.severity", errors);
+          validateOptionalBoolean(kicad.drc.schematic_parity, "kicad.drc.schematic_parity", errors);
+          validateOptionalBoolean(kicad.drc.refill_zones, "kicad.drc.refill_zones", errors);
+          validateOptionalBoolean(kicad.drc.severity_exclusions, "kicad.drc.severity_exclusions", errors);
+        }
+      }
+      if (kicad.erc !== undefined) {
+        if (!isPlainObject(kicad.erc)) {
+          errors.push("kicad.erc must be an object");
+        } else {
+          allowKeys(kicad.erc, ["severity", "severity_exclusions"], "kicad.erc", errors);
+          validateSeveritySelector(kicad.erc.severity, "kicad.erc.severity", errors);
+          validateOptionalBoolean(kicad.erc.severity_exclusions, "kicad.erc.severity_exclusions", errors);
+        }
+      }
+    }
   }
-  if (config.project?.require_kicad_cli !== undefined && typeof config.project.require_kicad_cli !== "boolean") {
-    errors.push("project.require_kicad_cli must be a boolean");
-  }
-  if (config.rules) {
-    for (const [ruleId, severity] of Object.entries(config.rules)) {
+
+  const rules = root.rules;
+  if (rules !== undefined) {
+    if (!isPlainObject(rules)) {
+      errors.push("rules must be an object");
+      return errors.sort();
+    }
+    const knownRuleIds = new Set(Object.keys(ruleDefinitions));
+    for (const [ruleId, severity] of Object.entries(rules)) {
+      if (!knownRuleIds.has(ruleId)) {
+        errors.push(`rules.${ruleId} is not a known BoardGuard rule`);
+        continue;
+      }
       if (severity === "error" || severity === "warning" || severity === "off") {
         continue;
       }
@@ -121,6 +230,17 @@ export function configuredSeverity(config: BoardGuardConfig | undefined, ruleId:
   return configured;
 }
 
+export function applyConfiguredFinding(finding: Finding, config?: BoardGuardConfig): Finding | undefined {
+  const severity = configuredSeverity(config, finding.ruleId);
+  if (severity === "off") {
+    return undefined;
+  }
+  if (severity) {
+    return { ...finding, severity };
+  }
+  return finding;
+}
+
 export function manufacturingPlan(config: BoardGuardConfig | undefined): ManufacturingPlan | undefined {
   const manufacturing = config?.manufacturing;
   if (!manufacturing) {
@@ -132,4 +252,26 @@ export function manufacturingPlan(config: BoardGuardConfig | undefined): Manufac
     outputDir: manufacturing.output_dir,
     expectedArtifacts: manufacturing.expected_artifacts ?? {}
   };
+}
+
+function validateOptionalBoolean(value: unknown, name: string, errors: string[]): void {
+  if (value !== undefined && typeof value !== "boolean") {
+    errors.push(`${name} must be a boolean`);
+  }
+}
+
+function validateOptionalString(value: unknown, name: string, errors: string[]): void {
+  if (value !== undefined && typeof value !== "string") {
+    errors.push(`${name} must be a string`);
+  }
+}
+
+function validateSeveritySelector(value: unknown, name: string, errors: string[]): void {
+  if (value !== undefined && value !== "all" && value !== "error" && value !== "warning") {
+    errors.push(`${name} must be all, error, or warning`);
+  }
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }

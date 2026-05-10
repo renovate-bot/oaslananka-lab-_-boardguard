@@ -25098,13 +25098,13 @@ var require_minimatch = __commonJS({
 var require_readdir_glob = __commonJS({
   "node_modules/.pnpm/readdir-glob@1.1.3/node_modules/readdir-glob/index.js"(exports2, module2) {
     module2.exports = readdirGlob;
-    var fs11 = require("fs");
+    var fs13 = require("fs");
     var { EventEmitter: EventEmitter3 } = require("events");
     var { Minimatch } = require_minimatch();
     var { resolve: resolve2 } = require("path");
     function readdir2(dir, strict) {
       return new Promise((resolve3, reject) => {
-        fs11.readdir(dir, { withFileTypes: true }, (err, files) => {
+        fs13.readdir(dir, { withFileTypes: true }, (err, files) => {
           if (err) {
             switch (err.code) {
               case "ENOTDIR":
@@ -25137,7 +25137,7 @@ var require_readdir_glob = __commonJS({
     }
     function stat2(file, followSymlinks) {
       return new Promise((resolve3, reject) => {
-        const statFunc = followSymlinks ? fs11.stat : fs11.lstat;
+        const statFunc = followSymlinks ? fs13.stat : fs13.lstat;
         statFunc(file, (err, stats) => {
           if (err) {
             switch (err.code) {
@@ -27202,54 +27202,54 @@ var require_polyfills = __commonJS({
     }
     var chdir;
     module2.exports = patch;
-    function patch(fs11) {
+    function patch(fs13) {
       if (constants3.hasOwnProperty("O_SYMLINK") && process.version.match(/^v0\.6\.[0-2]|^v0\.5\./)) {
-        patchLchmod(fs11);
+        patchLchmod(fs13);
       }
-      if (!fs11.lutimes) {
-        patchLutimes(fs11);
+      if (!fs13.lutimes) {
+        patchLutimes(fs13);
       }
-      fs11.chown = chownFix(fs11.chown);
-      fs11.fchown = chownFix(fs11.fchown);
-      fs11.lchown = chownFix(fs11.lchown);
-      fs11.chmod = chmodFix(fs11.chmod);
-      fs11.fchmod = chmodFix(fs11.fchmod);
-      fs11.lchmod = chmodFix(fs11.lchmod);
-      fs11.chownSync = chownFixSync(fs11.chownSync);
-      fs11.fchownSync = chownFixSync(fs11.fchownSync);
-      fs11.lchownSync = chownFixSync(fs11.lchownSync);
-      fs11.chmodSync = chmodFixSync(fs11.chmodSync);
-      fs11.fchmodSync = chmodFixSync(fs11.fchmodSync);
-      fs11.lchmodSync = chmodFixSync(fs11.lchmodSync);
-      fs11.stat = statFix(fs11.stat);
-      fs11.fstat = statFix(fs11.fstat);
-      fs11.lstat = statFix(fs11.lstat);
-      fs11.statSync = statFixSync(fs11.statSync);
-      fs11.fstatSync = statFixSync(fs11.fstatSync);
-      fs11.lstatSync = statFixSync(fs11.lstatSync);
-      if (fs11.chmod && !fs11.lchmod) {
-        fs11.lchmod = function(path13, mode, cb) {
+      fs13.chown = chownFix(fs13.chown);
+      fs13.fchown = chownFix(fs13.fchown);
+      fs13.lchown = chownFix(fs13.lchown);
+      fs13.chmod = chmodFix(fs13.chmod);
+      fs13.fchmod = chmodFix(fs13.fchmod);
+      fs13.lchmod = chmodFix(fs13.lchmod);
+      fs13.chownSync = chownFixSync(fs13.chownSync);
+      fs13.fchownSync = chownFixSync(fs13.fchownSync);
+      fs13.lchownSync = chownFixSync(fs13.lchownSync);
+      fs13.chmodSync = chmodFixSync(fs13.chmodSync);
+      fs13.fchmodSync = chmodFixSync(fs13.fchmodSync);
+      fs13.lchmodSync = chmodFixSync(fs13.lchmodSync);
+      fs13.stat = statFix(fs13.stat);
+      fs13.fstat = statFix(fs13.fstat);
+      fs13.lstat = statFix(fs13.lstat);
+      fs13.statSync = statFixSync(fs13.statSync);
+      fs13.fstatSync = statFixSync(fs13.fstatSync);
+      fs13.lstatSync = statFixSync(fs13.lstatSync);
+      if (fs13.chmod && !fs13.lchmod) {
+        fs13.lchmod = function(path13, mode, cb) {
           if (cb) process.nextTick(cb);
         };
-        fs11.lchmodSync = function() {
+        fs13.lchmodSync = function() {
         };
       }
-      if (fs11.chown && !fs11.lchown) {
-        fs11.lchown = function(path13, uid, gid, cb) {
+      if (fs13.chown && !fs13.lchown) {
+        fs13.lchown = function(path13, uid, gid, cb) {
           if (cb) process.nextTick(cb);
         };
-        fs11.lchownSync = function() {
+        fs13.lchownSync = function() {
         };
       }
       if (platform2 === "win32") {
-        fs11.rename = typeof fs11.rename !== "function" ? fs11.rename : (function(fs$rename) {
+        fs13.rename = typeof fs13.rename !== "function" ? fs13.rename : (function(fs$rename) {
           function rename2(from, to, cb) {
             var start = Date.now();
             var backoff = 0;
             fs$rename(from, to, function CB(er) {
               if (er && (er.code === "EACCES" || er.code === "EPERM" || er.code === "EBUSY") && Date.now() - start < 6e4) {
                 setTimeout(function() {
-                  fs11.stat(to, function(stater, st) {
+                  fs13.stat(to, function(stater, st) {
                     if (stater && stater.code === "ENOENT")
                       fs$rename(from, to, CB);
                     else
@@ -27265,9 +27265,9 @@ var require_polyfills = __commonJS({
           }
           if (Object.setPrototypeOf) Object.setPrototypeOf(rename2, fs$rename);
           return rename2;
-        })(fs11.rename);
+        })(fs13.rename);
       }
-      fs11.read = typeof fs11.read !== "function" ? fs11.read : (function(fs$read) {
+      fs13.read = typeof fs13.read !== "function" ? fs13.read : (function(fs$read) {
         function read(fd, buffer2, offset, length, position, callback_) {
           var callback;
           if (callback_ && typeof callback_ === "function") {
@@ -27275,22 +27275,22 @@ var require_polyfills = __commonJS({
             callback = function(er, _2, __) {
               if (er && er.code === "EAGAIN" && eagCounter < 10) {
                 eagCounter++;
-                return fs$read.call(fs11, fd, buffer2, offset, length, position, callback);
+                return fs$read.call(fs13, fd, buffer2, offset, length, position, callback);
               }
               callback_.apply(this, arguments);
             };
           }
-          return fs$read.call(fs11, fd, buffer2, offset, length, position, callback);
+          return fs$read.call(fs13, fd, buffer2, offset, length, position, callback);
         }
         if (Object.setPrototypeOf) Object.setPrototypeOf(read, fs$read);
         return read;
-      })(fs11.read);
-      fs11.readSync = typeof fs11.readSync !== "function" ? fs11.readSync : /* @__PURE__ */ (function(fs$readSync) {
+      })(fs13.read);
+      fs13.readSync = typeof fs13.readSync !== "function" ? fs13.readSync : /* @__PURE__ */ (function(fs$readSync) {
         return function(fd, buffer2, offset, length, position) {
           var eagCounter = 0;
           while (true) {
             try {
-              return fs$readSync.call(fs11, fd, buffer2, offset, length, position);
+              return fs$readSync.call(fs13, fd, buffer2, offset, length, position);
             } catch (er) {
               if (er.code === "EAGAIN" && eagCounter < 10) {
                 eagCounter++;
@@ -27300,10 +27300,10 @@ var require_polyfills = __commonJS({
             }
           }
         };
-      })(fs11.readSync);
-      function patchLchmod(fs12) {
-        fs12.lchmod = function(path13, mode, callback) {
-          fs12.open(
+      })(fs13.readSync);
+      function patchLchmod(fs14) {
+        fs14.lchmod = function(path13, mode, callback) {
+          fs14.open(
             path13,
             constants3.O_WRONLY | constants3.O_SYMLINK,
             mode,
@@ -27312,80 +27312,80 @@ var require_polyfills = __commonJS({
                 if (callback) callback(err);
                 return;
               }
-              fs12.fchmod(fd, mode, function(err2) {
-                fs12.close(fd, function(err22) {
+              fs14.fchmod(fd, mode, function(err2) {
+                fs14.close(fd, function(err22) {
                   if (callback) callback(err2 || err22);
                 });
               });
             }
           );
         };
-        fs12.lchmodSync = function(path13, mode) {
-          var fd = fs12.openSync(path13, constants3.O_WRONLY | constants3.O_SYMLINK, mode);
+        fs14.lchmodSync = function(path13, mode) {
+          var fd = fs14.openSync(path13, constants3.O_WRONLY | constants3.O_SYMLINK, mode);
           var threw = true;
           var ret;
           try {
-            ret = fs12.fchmodSync(fd, mode);
+            ret = fs14.fchmodSync(fd, mode);
             threw = false;
           } finally {
             if (threw) {
               try {
-                fs12.closeSync(fd);
+                fs14.closeSync(fd);
               } catch (er) {
               }
             } else {
-              fs12.closeSync(fd);
+              fs14.closeSync(fd);
             }
           }
           return ret;
         };
       }
-      function patchLutimes(fs12) {
-        if (constants3.hasOwnProperty("O_SYMLINK") && fs12.futimes) {
-          fs12.lutimes = function(path13, at, mt, cb) {
-            fs12.open(path13, constants3.O_SYMLINK, function(er, fd) {
+      function patchLutimes(fs14) {
+        if (constants3.hasOwnProperty("O_SYMLINK") && fs14.futimes) {
+          fs14.lutimes = function(path13, at, mt, cb) {
+            fs14.open(path13, constants3.O_SYMLINK, function(er, fd) {
               if (er) {
                 if (cb) cb(er);
                 return;
               }
-              fs12.futimes(fd, at, mt, function(er2) {
-                fs12.close(fd, function(er22) {
+              fs14.futimes(fd, at, mt, function(er2) {
+                fs14.close(fd, function(er22) {
                   if (cb) cb(er2 || er22);
                 });
               });
             });
           };
-          fs12.lutimesSync = function(path13, at, mt) {
-            var fd = fs12.openSync(path13, constants3.O_SYMLINK);
+          fs14.lutimesSync = function(path13, at, mt) {
+            var fd = fs14.openSync(path13, constants3.O_SYMLINK);
             var ret;
             var threw = true;
             try {
-              ret = fs12.futimesSync(fd, at, mt);
+              ret = fs14.futimesSync(fd, at, mt);
               threw = false;
             } finally {
               if (threw) {
                 try {
-                  fs12.closeSync(fd);
+                  fs14.closeSync(fd);
                 } catch (er) {
                 }
               } else {
-                fs12.closeSync(fd);
+                fs14.closeSync(fd);
               }
             }
             return ret;
           };
-        } else if (fs12.futimes) {
-          fs12.lutimes = function(_a, _b, _c, cb) {
+        } else if (fs14.futimes) {
+          fs14.lutimes = function(_a, _b, _c, cb) {
             if (cb) process.nextTick(cb);
           };
-          fs12.lutimesSync = function() {
+          fs14.lutimesSync = function() {
           };
         }
       }
       function chmodFix(orig) {
         if (!orig) return orig;
         return function(target, mode, cb) {
-          return orig.call(fs11, target, mode, function(er) {
+          return orig.call(fs13, target, mode, function(er) {
             if (chownErOk(er)) er = null;
             if (cb) cb.apply(this, arguments);
           });
@@ -27395,7 +27395,7 @@ var require_polyfills = __commonJS({
         if (!orig) return orig;
         return function(target, mode) {
           try {
-            return orig.call(fs11, target, mode);
+            return orig.call(fs13, target, mode);
           } catch (er) {
             if (!chownErOk(er)) throw er;
           }
@@ -27404,7 +27404,7 @@ var require_polyfills = __commonJS({
       function chownFix(orig) {
         if (!orig) return orig;
         return function(target, uid, gid, cb) {
-          return orig.call(fs11, target, uid, gid, function(er) {
+          return orig.call(fs13, target, uid, gid, function(er) {
             if (chownErOk(er)) er = null;
             if (cb) cb.apply(this, arguments);
           });
@@ -27414,7 +27414,7 @@ var require_polyfills = __commonJS({
         if (!orig) return orig;
         return function(target, uid, gid) {
           try {
-            return orig.call(fs11, target, uid, gid);
+            return orig.call(fs13, target, uid, gid);
           } catch (er) {
             if (!chownErOk(er)) throw er;
           }
@@ -27434,13 +27434,13 @@ var require_polyfills = __commonJS({
             }
             if (cb) cb.apply(this, arguments);
           }
-          return options ? orig.call(fs11, target, options, callback) : orig.call(fs11, target, callback);
+          return options ? orig.call(fs13, target, options, callback) : orig.call(fs13, target, callback);
         };
       }
       function statFixSync(orig) {
         if (!orig) return orig;
         return function(target, options) {
-          var stats = options ? orig.call(fs11, target, options) : orig.call(fs11, target);
+          var stats = options ? orig.call(fs13, target, options) : orig.call(fs13, target);
           if (stats) {
             if (stats.uid < 0) stats.uid += 4294967296;
             if (stats.gid < 0) stats.gid += 4294967296;
@@ -27469,7 +27469,7 @@ var require_legacy_streams = __commonJS({
   "node_modules/.pnpm/graceful-fs@4.2.11/node_modules/graceful-fs/legacy-streams.js"(exports2, module2) {
     var Stream = require("stream").Stream;
     module2.exports = legacy;
-    function legacy(fs11) {
+    function legacy(fs13) {
       return {
         ReadStream,
         WriteStream
@@ -27512,7 +27512,7 @@ var require_legacy_streams = __commonJS({
           });
           return;
         }
-        fs11.open(this.path, this.flags, this.mode, function(err, fd) {
+        fs13.open(this.path, this.flags, this.mode, function(err, fd) {
           if (err) {
             self2.emit("error", err);
             self2.readable = false;
@@ -27551,7 +27551,7 @@ var require_legacy_streams = __commonJS({
         this.busy = false;
         this._queue = [];
         if (this.fd === null) {
-          this._open = fs11.open;
+          this._open = fs13.open;
           this._queue.push([this._open, this.path, this.flags, this.mode, void 0]);
           this.flush();
         }
@@ -27586,7 +27586,7 @@ var require_clone = __commonJS({
 // node_modules/.pnpm/graceful-fs@4.2.11/node_modules/graceful-fs/graceful-fs.js
 var require_graceful_fs = __commonJS({
   "node_modules/.pnpm/graceful-fs@4.2.11/node_modules/graceful-fs/graceful-fs.js"(exports2, module2) {
-    var fs11 = require("fs");
+    var fs13 = require("fs");
     var polyfills = require_polyfills();
     var legacy = require_legacy_streams();
     var clone = require_clone();
@@ -27618,12 +27618,12 @@ var require_graceful_fs = __commonJS({
         m = "GFS4: " + m.split(/\n/).join("\nGFS4: ");
         console.error(m);
       };
-    if (!fs11[gracefulQueue]) {
+    if (!fs13[gracefulQueue]) {
       queue = global[gracefulQueue] || [];
-      publishQueue(fs11, queue);
-      fs11.close = (function(fs$close) {
+      publishQueue(fs13, queue);
+      fs13.close = (function(fs$close) {
         function close(fd, cb) {
-          return fs$close.call(fs11, fd, function(err) {
+          return fs$close.call(fs13, fd, function(err) {
             if (!err) {
               resetQueue();
             }
@@ -27635,40 +27635,40 @@ var require_graceful_fs = __commonJS({
           value: fs$close
         });
         return close;
-      })(fs11.close);
-      fs11.closeSync = (function(fs$closeSync) {
+      })(fs13.close);
+      fs13.closeSync = (function(fs$closeSync) {
         function closeSync(fd) {
-          fs$closeSync.apply(fs11, arguments);
+          fs$closeSync.apply(fs13, arguments);
           resetQueue();
         }
         Object.defineProperty(closeSync, previousSymbol, {
           value: fs$closeSync
         });
         return closeSync;
-      })(fs11.closeSync);
+      })(fs13.closeSync);
       if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || "")) {
         process.on("exit", function() {
-          debug2(fs11[gracefulQueue]);
-          require("assert").equal(fs11[gracefulQueue].length, 0);
+          debug2(fs13[gracefulQueue]);
+          require("assert").equal(fs13[gracefulQueue].length, 0);
         });
       }
     }
     var queue;
     if (!global[gracefulQueue]) {
-      publishQueue(global, fs11[gracefulQueue]);
+      publishQueue(global, fs13[gracefulQueue]);
     }
-    module2.exports = patch(clone(fs11));
-    if (process.env.TEST_GRACEFUL_FS_GLOBAL_PATCH && !fs11.__patched) {
-      module2.exports = patch(fs11);
-      fs11.__patched = true;
+    module2.exports = patch(clone(fs13));
+    if (process.env.TEST_GRACEFUL_FS_GLOBAL_PATCH && !fs13.__patched) {
+      module2.exports = patch(fs13);
+      fs13.__patched = true;
     }
-    function patch(fs12) {
-      polyfills(fs12);
-      fs12.gracefulify = patch;
-      fs12.createReadStream = createReadStream2;
-      fs12.createWriteStream = createWriteStream2;
-      var fs$readFile = fs12.readFile;
-      fs12.readFile = readFile;
+    function patch(fs14) {
+      polyfills(fs14);
+      fs14.gracefulify = patch;
+      fs14.createReadStream = createReadStream2;
+      fs14.createWriteStream = createWriteStream2;
+      var fs$readFile = fs14.readFile;
+      fs14.readFile = readFile;
       function readFile(path13, options, cb) {
         if (typeof options === "function")
           cb = options, options = null;
@@ -27684,8 +27684,8 @@ var require_graceful_fs = __commonJS({
           });
         }
       }
-      var fs$writeFile = fs12.writeFile;
-      fs12.writeFile = writeFile2;
+      var fs$writeFile = fs14.writeFile;
+      fs14.writeFile = writeFile2;
       function writeFile2(path13, data, options, cb) {
         if (typeof options === "function")
           cb = options, options = null;
@@ -27701,9 +27701,9 @@ var require_graceful_fs = __commonJS({
           });
         }
       }
-      var fs$appendFile = fs12.appendFile;
+      var fs$appendFile = fs14.appendFile;
       if (fs$appendFile)
-        fs12.appendFile = appendFile2;
+        fs14.appendFile = appendFile2;
       function appendFile2(path13, data, options, cb) {
         if (typeof options === "function")
           cb = options, options = null;
@@ -27719,9 +27719,9 @@ var require_graceful_fs = __commonJS({
           });
         }
       }
-      var fs$copyFile = fs12.copyFile;
+      var fs$copyFile = fs14.copyFile;
       if (fs$copyFile)
-        fs12.copyFile = copyFile2;
+        fs14.copyFile = copyFile2;
       function copyFile2(src, dest, flags, cb) {
         if (typeof flags === "function") {
           cb = flags;
@@ -27739,8 +27739,8 @@ var require_graceful_fs = __commonJS({
           });
         }
       }
-      var fs$readdir = fs12.readdir;
-      fs12.readdir = readdir2;
+      var fs$readdir = fs14.readdir;
+      fs14.readdir = readdir2;
       var noReaddirOptionVersions = /^v[0-5]\./;
       function readdir2(path13, options, cb) {
         if (typeof options === "function")
@@ -27781,21 +27781,21 @@ var require_graceful_fs = __commonJS({
         }
       }
       if (process.version.substr(0, 4) === "v0.8") {
-        var legStreams = legacy(fs12);
+        var legStreams = legacy(fs14);
         ReadStream = legStreams.ReadStream;
         WriteStream = legStreams.WriteStream;
       }
-      var fs$ReadStream = fs12.ReadStream;
+      var fs$ReadStream = fs14.ReadStream;
       if (fs$ReadStream) {
         ReadStream.prototype = Object.create(fs$ReadStream.prototype);
         ReadStream.prototype.open = ReadStream$open;
       }
-      var fs$WriteStream = fs12.WriteStream;
+      var fs$WriteStream = fs14.WriteStream;
       if (fs$WriteStream) {
         WriteStream.prototype = Object.create(fs$WriteStream.prototype);
         WriteStream.prototype.open = WriteStream$open;
       }
-      Object.defineProperty(fs12, "ReadStream", {
+      Object.defineProperty(fs14, "ReadStream", {
         get: function() {
           return ReadStream;
         },
@@ -27805,7 +27805,7 @@ var require_graceful_fs = __commonJS({
         enumerable: true,
         configurable: true
       });
-      Object.defineProperty(fs12, "WriteStream", {
+      Object.defineProperty(fs14, "WriteStream", {
         get: function() {
           return WriteStream;
         },
@@ -27816,7 +27816,7 @@ var require_graceful_fs = __commonJS({
         configurable: true
       });
       var FileReadStream = ReadStream;
-      Object.defineProperty(fs12, "FileReadStream", {
+      Object.defineProperty(fs14, "FileReadStream", {
         get: function() {
           return FileReadStream;
         },
@@ -27827,7 +27827,7 @@ var require_graceful_fs = __commonJS({
         configurable: true
       });
       var FileWriteStream = WriteStream;
-      Object.defineProperty(fs12, "FileWriteStream", {
+      Object.defineProperty(fs14, "FileWriteStream", {
         get: function() {
           return FileWriteStream;
         },
@@ -27876,13 +27876,13 @@ var require_graceful_fs = __commonJS({
         });
       }
       function createReadStream2(path13, options) {
-        return new fs12.ReadStream(path13, options);
+        return new fs14.ReadStream(path13, options);
       }
       function createWriteStream2(path13, options) {
-        return new fs12.WriteStream(path13, options);
+        return new fs14.WriteStream(path13, options);
       }
-      var fs$open = fs12.open;
-      fs12.open = open2;
+      var fs$open = fs14.open;
+      fs14.open = open2;
       function open2(path13, flags, mode, cb) {
         if (typeof mode === "function")
           cb = mode, mode = null;
@@ -27898,20 +27898,20 @@ var require_graceful_fs = __commonJS({
           });
         }
       }
-      return fs12;
+      return fs14;
     }
     function enqueue(elem) {
       debug2("ENQUEUE", elem[0].name, elem[1]);
-      fs11[gracefulQueue].push(elem);
+      fs13[gracefulQueue].push(elem);
       retry2();
     }
     var retryTimer;
     function resetQueue() {
       var now = Date.now();
-      for (var i = 0; i < fs11[gracefulQueue].length; ++i) {
-        if (fs11[gracefulQueue][i].length > 2) {
-          fs11[gracefulQueue][i][3] = now;
-          fs11[gracefulQueue][i][4] = now;
+      for (var i = 0; i < fs13[gracefulQueue].length; ++i) {
+        if (fs13[gracefulQueue][i].length > 2) {
+          fs13[gracefulQueue][i][3] = now;
+          fs13[gracefulQueue][i][4] = now;
         }
       }
       retry2();
@@ -27919,9 +27919,9 @@ var require_graceful_fs = __commonJS({
     function retry2() {
       clearTimeout(retryTimer);
       retryTimer = void 0;
-      if (fs11[gracefulQueue].length === 0)
+      if (fs13[gracefulQueue].length === 0)
         return;
-      var elem = fs11[gracefulQueue].shift();
+      var elem = fs13[gracefulQueue].shift();
       var fn = elem[0];
       var args = elem[1];
       var err = elem[2];
@@ -27943,7 +27943,7 @@ var require_graceful_fs = __commonJS({
           debug2("RETRY", fn.name, args);
           fn.apply(null, args.concat([startTime]));
         } else {
-          fs11[gracefulQueue].push(elem);
+          fs13[gracefulQueue].push(elem);
         }
       }
       if (retryTimer === void 0) {
@@ -37972,7 +37972,7 @@ var require_isPlainObject = __commonJS({
     var funcToString = funcProto.toString;
     var hasOwnProperty = objectProto.hasOwnProperty;
     var objectCtorString = funcToString.call(Object);
-    function isPlainObject3(value) {
+    function isPlainObject4(value) {
       if (!isObjectLike(value) || baseGetTag(value) != objectTag) {
         return false;
       }
@@ -37983,7 +37983,7 @@ var require_isPlainObject = __commonJS({
       var Ctor = hasOwnProperty.call(proto, "constructor") && proto.constructor;
       return typeof Ctor == "function" && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
     }
-    module2.exports = isPlainObject3;
+    module2.exports = isPlainObject4;
   }
 });
 
@@ -43026,8 +43026,8 @@ var require_commonjs6 = __commonJS({
        *
        * @internal
        */
-      constructor(cwd = process.cwd(), pathImpl, sep2, { nocase, childrenCacheSize = 16 * 1024, fs: fs11 = defaultFS } = {}) {
-        this.#fs = fsFromOption(fs11);
+      constructor(cwd = process.cwd(), pathImpl, sep2, { nocase, childrenCacheSize = 16 * 1024, fs: fs13 = defaultFS } = {}) {
+        this.#fs = fsFromOption(fs13);
         if (cwd instanceof URL || cwd.startsWith("file://")) {
           cwd = (0, node_url_1.fileURLToPath)(cwd);
         }
@@ -43586,8 +43586,8 @@ var require_commonjs6 = __commonJS({
       /**
        * @internal
        */
-      newRoot(fs11) {
-        return new PathWin32(this.rootPath, IFDIR, void 0, this.roots, this.nocase, this.childrenCache(), { fs: fs11 });
+      newRoot(fs13) {
+        return new PathWin32(this.rootPath, IFDIR, void 0, this.roots, this.nocase, this.childrenCache(), { fs: fs13 });
       }
       /**
        * Return true if the provided path string is an absolute path
@@ -43616,8 +43616,8 @@ var require_commonjs6 = __commonJS({
       /**
        * @internal
        */
-      newRoot(fs11) {
-        return new PathPosix(this.rootPath, IFDIR, void 0, this.roots, this.nocase, this.childrenCache(), { fs: fs11 });
+      newRoot(fs13) {
+        return new PathPosix(this.rootPath, IFDIR, void 0, this.roots, this.nocase, this.childrenCache(), { fs: fs13 });
       }
       /**
        * Return true if the provided path string is an absolute path
@@ -44802,12 +44802,12 @@ var require_commonjs7 = __commonJS({
 // node_modules/.pnpm/archiver-utils@5.0.2/node_modules/archiver-utils/file.js
 var require_file2 = __commonJS({
   "node_modules/.pnpm/archiver-utils@5.0.2/node_modules/archiver-utils/file.js"(exports2, module2) {
-    var fs11 = require_graceful_fs();
+    var fs13 = require_graceful_fs();
     var path13 = require("path");
     var flatten = require_flatten();
     var difference = require_difference();
     var union = require_union();
-    var isPlainObject3 = require_isPlainObject();
+    var isPlainObject4 = require_isPlainObject();
     var glob = require_commonjs7();
     var file = module2.exports = {};
     var pathSeparatorRe = /[\/\\]/g;
@@ -44829,10 +44829,10 @@ var require_file2 = __commonJS({
     };
     file.exists = function() {
       var filepath = path13.join.apply(path13, arguments);
-      return fs11.existsSync(filepath);
+      return fs13.existsSync(filepath);
     };
     file.expand = function(...args) {
-      var options = isPlainObject3(args[0]) ? args.shift() : {};
+      var options = isPlainObject4(args[0]) ? args.shift() : {};
       var patterns = Array.isArray(args[0]) ? args[0] : args;
       if (patterns.length === 0) {
         return [];
@@ -44847,7 +44847,7 @@ var require_file2 = __commonJS({
             if (typeof options.filter === "function") {
               return options.filter(filepath);
             } else {
-              return fs11.statSync(filepath)[options.filter]();
+              return fs13.statSync(filepath)[options.filter]();
             }
           } catch (e) {
             return false;
@@ -44955,7 +44955,7 @@ var require_file2 = __commonJS({
 // node_modules/.pnpm/archiver-utils@5.0.2/node_modules/archiver-utils/index.js
 var require_archiver_utils = __commonJS({
   "node_modules/.pnpm/archiver-utils@5.0.2/node_modules/archiver-utils/index.js"(exports2, module2) {
-    var fs11 = require_graceful_fs();
+    var fs13 = require_graceful_fs();
     var path13 = require("path");
     var isStream = require_is_stream();
     var lazystream = require_lazystream();
@@ -45004,7 +45004,7 @@ var require_archiver_utils = __commonJS({
     };
     utils.lazyReadStream = function(filepath) {
       return new lazystream.Readable(function() {
-        return fs11.createReadStream(filepath);
+        return fs13.createReadStream(filepath);
       });
     };
     utils.normalizeInputSource = function(source) {
@@ -45032,7 +45032,7 @@ var require_archiver_utils = __commonJS({
         callback = base;
         base = dirpath;
       }
-      fs11.readdir(dirpath, function(err, list) {
+      fs13.readdir(dirpath, function(err, list) {
         var i = 0;
         var file;
         var filepath;
@@ -45045,7 +45045,7 @@ var require_archiver_utils = __commonJS({
             return callback(null, results);
           }
           filepath = path13.join(dirpath, file);
-          fs11.stat(filepath, function(err2, stats) {
+          fs13.stat(filepath, function(err2, stats) {
             results.push({
               path: filepath,
               relative: path13.relative(base, filepath).replace(/\\/g, "/"),
@@ -45107,7 +45107,7 @@ var require_error = __commonJS({
 // node_modules/.pnpm/archiver@7.0.1/node_modules/archiver/lib/core.js
 var require_core = __commonJS({
   "node_modules/.pnpm/archiver@7.0.1/node_modules/archiver/lib/core.js"(exports2, module2) {
-    var fs11 = require("fs");
+    var fs13 = require("fs");
     var glob = require_readdir_glob();
     var async = require_async();
     var path13 = require("path");
@@ -45171,7 +45171,7 @@ var require_core = __commonJS({
       data.sourcePath = filepath;
       task.data = data;
       this._entriesCount++;
-      if (data.stats && data.stats instanceof fs11.Stats) {
+      if (data.stats && data.stats instanceof fs13.Stats) {
         task = this._updateQueueTaskWithStats(task, data.stats);
         if (task) {
           if (data.stats.size) {
@@ -45342,7 +45342,7 @@ var require_core = __commonJS({
         callback();
         return;
       }
-      fs11.lstat(task.filepath, function(err, stats) {
+      fs13.lstat(task.filepath, function(err, stats) {
         if (this._state.aborted) {
           setImmediate(callback);
           return;
@@ -45385,7 +45385,7 @@ var require_core = __commonJS({
         task.data.sourceType = "buffer";
         task.source = Buffer.concat([]);
       } else if (stats.isSymbolicLink() && this._moduleSupports("symlink")) {
-        var linkPath = fs11.readlinkSync(task.filepath);
+        var linkPath = fs13.readlinkSync(task.filepath);
         var dirName = path13.dirname(task.filepath);
         task.data.type = "symlink";
         task.data.linkname = path13.relative(dirName, path13.resolve(dirName, linkPath));
@@ -52209,7 +52209,7 @@ var require_parser_stream = __commonJS({
 var require_mkdirp = __commonJS({
   "node_modules/.pnpm/mkdirp@0.5.6/node_modules/mkdirp/index.js"(exports2, module2) {
     var path13 = require("path");
-    var fs11 = require("fs");
+    var fs13 = require("fs");
     var _0777 = parseInt("0777", 8);
     module2.exports = mkdirP.mkdirp = mkdirP.mkdirP = mkdirP;
     function mkdirP(p, opts, f, made) {
@@ -52220,7 +52220,7 @@ var require_mkdirp = __commonJS({
         opts = { mode: opts };
       }
       var mode = opts.mode;
-      var xfs = opts.fs || fs11;
+      var xfs = opts.fs || fs13;
       if (mode === void 0) {
         mode = _0777;
       }
@@ -52259,7 +52259,7 @@ var require_mkdirp = __commonJS({
         opts = { mode: opts };
       }
       var mode = opts.mode;
-      var xfs = opts.fs || fs11;
+      var xfs = opts.fs || fs13;
       if (mode === void 0) {
         mode = _0777;
       }
@@ -52296,7 +52296,7 @@ var require_mkdirp = __commonJS({
 // node_modules/.pnpm/unzip-stream@0.3.4/node_modules/unzip-stream/lib/extract.js
 var require_extract2 = __commonJS({
   "node_modules/.pnpm/unzip-stream@0.3.4/node_modules/unzip-stream/lib/extract.js"(exports2, module2) {
-    var fs11 = require("fs");
+    var fs13 = require("fs");
     var path13 = require("path");
     var util3 = require("util");
     var mkdirp = require_mkdirp();
@@ -52343,7 +52343,7 @@ var require_extract2 = __commonJS({
       var directory = entry.isDirectory ? destPath : path13.dirname(destPath);
       this.unfinishedEntries++;
       var writeFileFn = function() {
-        var pipedStream = fs11.createWriteStream(destPath);
+        var pipedStream = fs13.createWriteStream(destPath);
         pipedStream.on("close", function() {
           self2.unfinishedEntries--;
           self2._notifyAwaiter();
@@ -60564,14 +60564,14 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs11 = this.flowScalar(this.type);
+              const fs13 = this.flowScalar(this.type);
               if (atNextItem || it.value) {
-                map.items.push({ start, key: fs11, sep: [] });
+                map.items.push({ start, key: fs13, sep: [] });
                 this.onKeyLine = true;
               } else if (it.sep) {
-                this.stack.push(fs11);
+                this.stack.push(fs13);
               } else {
-                Object.assign(it, { key: fs11, sep: [] });
+                Object.assign(it, { key: fs13, sep: [] });
                 this.onKeyLine = true;
               }
               return;
@@ -60699,13 +60699,13 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs11 = this.flowScalar(this.type);
+              const fs13 = this.flowScalar(this.type);
               if (!it || it.value)
-                fc.items.push({ start: [], key: fs11, sep: [] });
+                fc.items.push({ start: [], key: fs13, sep: [] });
               else if (it.sep)
-                this.stack.push(fs11);
+                this.stack.push(fs13);
               else
-                Object.assign(it, { key: fs11, sep: [] });
+                Object.assign(it, { key: fs13, sep: [] });
               return;
             }
             case "flow-map-end":
@@ -61014,7 +61014,7 @@ var require_dist5 = __commonJS({
 });
 
 // src/action/index.ts
-var import_promises7 = __toESM(require("node:fs/promises"), 1);
+var import_promises9 = __toESM(require("node:fs/promises"), 1);
 var import_node_fs2 = require("node:fs");
 var import_node_path9 = __toESM(require("node:path"), 1);
 var import_node_zlib2 = __toESM(require("node:zlib"), 1);
@@ -101157,6 +101157,7 @@ async function realpathIfExists(value) {
 }
 
 // src/core/analyzer.ts
+var import_promises8 = __toESM(require("node:fs/promises"), 1);
 var import_node_path8 = __toESM(require("node:path"), 1);
 
 // src/core/config.ts
@@ -101181,7 +101182,27 @@ var ignoredDirectories = /* @__PURE__ */ new Set([
 var defaultListOptions = {
   maxDepth: 8,
   maxFiles: 1e4,
-  maxFileSizeBytes: 10 * 1024 * 1024
+  maxFileSizeBytes: Number.POSITIVE_INFINITY
+};
+var fileSizeLimits = /* @__PURE__ */ new Map([
+  [".kicad_pro", 2 * 1024 * 1024],
+  [".kicad_sch", 50 * 1024 * 1024],
+  [".kicad_pcb", 250 * 1024 * 1024],
+  [".csv", 50 * 1024 * 1024],
+  [".tsv", 50 * 1024 * 1024]
+]);
+var defaultReadLimitBytes = 10 * 1024 * 1024;
+var FileTooLargeError = class extends Error {
+  constructor(file, size, limit) {
+    super(`${file} exceeds ${limit} byte limit for ${import_node_path2.default.extname(file) || "this file type"}`);
+    this.file = file;
+    this.size = size;
+    this.limit = limit;
+    this.name = "FileTooLargeError";
+  }
+  file;
+  size;
+  limit;
 };
 async function pathExists(value) {
   try {
@@ -101193,10 +101214,27 @@ async function pathExists(value) {
 }
 async function readTextFile(value) {
   const stat2 = await import_promises5.default.stat(value);
-  if (stat2.size > defaultListOptions.maxFileSizeBytes) {
-    throw new Error(`file exceeds ${defaultListOptions.maxFileSizeBytes} byte limit`);
+  const limit = fileSizeLimitForPath(value);
+  if (stat2.size > limit) {
+    throw new FileTooLargeError(value, stat2.size, limit);
   }
   return import_promises5.default.readFile(value, "utf8");
+}
+function fileSizeLimitForPath(value) {
+  return fileSizeLimits.get(import_node_path2.default.extname(value).toLowerCase()) ?? defaultReadLimitBytes;
+}
+async function fileTooLarge(value) {
+  let stat2;
+  try {
+    stat2 = await import_promises5.default.stat(value);
+  } catch (error2) {
+    if (isMissingPathError(error2)) {
+      return void 0;
+    }
+    throw error2;
+  }
+  const limit = fileSizeLimitForPath(value);
+  return stat2.size > limit ? { size: stat2.size, limit } : void 0;
 }
 async function listFiles(root, predicate, options = {}) {
   const results = [];
@@ -101226,9 +101264,18 @@ async function listFiles(root, predicate, options = {}) {
         continue;
       }
       if (entry.isFile() && (!allowedExtensions || allowedExtensions.has(import_node_path2.default.extname(entry.name))) && predicate(full)) {
-        const stat2 = await import_promises5.default.stat(full);
-        if (stat2.size > maxFileSizeBytes) {
-          continue;
+        if (Number.isFinite(maxFileSizeBytes)) {
+          try {
+            const stat2 = await import_promises5.default.stat(full);
+            if (stat2.size > maxFileSizeBytes) {
+              continue;
+            }
+          } catch (error2) {
+            if (isMissingPathError(error2)) {
+              continue;
+            }
+            throw error2;
+          }
         }
         results.push(full);
       }
@@ -101236,6 +101283,10 @@ async function listFiles(root, predicate, options = {}) {
   }
   await walk(root, 0);
   return results;
+}
+function isMissingPathError(error2) {
+  const code = error2?.code;
+  return code === "ENOENT" || code === "ENOTDIR";
 }
 
 // src/util/paths.ts
@@ -101270,6 +101321,119 @@ function maxSeverity(a, b) {
   return severityOrder[a] >= severityOrder[b] ? a : b;
 }
 
+// src/core/findings.ts
+var ruleDefinitions = {
+  "BG-CONFIG-001": {
+    id: "BG-CONFIG-001",
+    title: "BoardGuard configuration is invalid",
+    defaultSeverity: "high",
+    remediation: "Fix boardguard.yml so it matches the documented version 1 schema.",
+    maturity: "implemented"
+  },
+  "BG-PROJ-001": {
+    id: "BG-PROJ-001",
+    title: "no KiCad project found",
+    defaultSeverity: "high",
+    remediation: "Set the project input to the directory containing the KiCad project or add a .kicad_pro file.",
+    maturity: "implemented"
+  },
+  "BG-PROJ-002": {
+    id: "BG-PROJ-002",
+    title: "multiple KiCad projects found without explicit selection",
+    defaultSeverity: "medium",
+    remediation: "Set the project input to the intended .kicad_pro path.",
+    maturity: "implemented"
+  },
+  "BG-PROJ-003": {
+    id: "BG-PROJ-003",
+    title: "KiCad project is missing schematic or board file",
+    defaultSeverity: "high",
+    remediation: "Add the missing design file or configure BoardGuard to scan the correct project path.",
+    maturity: "implemented"
+  },
+  "BG-PROJ-004": {
+    id: "BG-PROJ-004",
+    title: "KiCad design file appears malformed or unreadable",
+    defaultSeverity: "high",
+    remediation: "Open and save the project in KiCad or restore the valid file.",
+    maturity: "implemented"
+  },
+  "BG-IO-TOO-LARGE": {
+    id: "BG-IO-TOO-LARGE",
+    title: "design input exceeds BoardGuard safety limits",
+    defaultSeverity: "high",
+    remediation: "Reduce the file size or raise support for this file type before relying on BoardGuard results.",
+    maturity: "implemented"
+  },
+  "BG-KICAD-001": {
+    id: "BG-KICAD-001",
+    title: "kicad-cli is unavailable",
+    defaultSeverity: "medium",
+    remediation: "Install KiCad CLI or configure kicad-cli-path.",
+    maturity: "implemented"
+  },
+  "BG-ERC-001": {
+    id: "BG-ERC-001",
+    title: "KiCad ERC failed",
+    defaultSeverity: "high",
+    remediation: "Fix ERC violations in the schematic before merging.",
+    maturity: "partial"
+  },
+  "BG-DRC-001": {
+    id: "BG-DRC-001",
+    title: "KiCad DRC failed",
+    defaultSeverity: "high",
+    remediation: "Fix DRC violations in the PCB before merging.",
+    maturity: "partial"
+  },
+  "BG-BOM-001": {
+    id: "BG-BOM-001",
+    title: "component is missing manufacturer part metadata",
+    defaultSeverity: "medium",
+    remediation: "Add manufacturer and manufacturer part number metadata.",
+    maturity: "partial"
+  },
+  "BG-BOM-002": {
+    id: "BG-BOM-002",
+    title: "duplicate component designator found",
+    defaultSeverity: "high",
+    remediation: "Re-annotate or correct duplicated designators.",
+    maturity: "implemented"
+  },
+  "BG-MFG-001": {
+    id: "BG-MFG-001",
+    title: "manufacturing release metadata is missing",
+    defaultSeverity: "medium",
+    remediation: "Add boardguard.yml with board name, revision, output profile, and release artifact policy.",
+    maturity: "implemented"
+  },
+  "BG-MFG-002": {
+    id: "BG-MFG-002",
+    title: "manufacturing output plan is incomplete",
+    defaultSeverity: "medium",
+    remediation: "Update boardguard.yml to declare expected manufacturing artifacts.",
+    maturity: "implemented"
+  },
+  "BG-PIN-001": {
+    id: "BG-PIN-001",
+    title: "firmware pinmap is inconsistent with declared hardware mapping",
+    defaultSeverity: "high",
+    remediation: "Update firmware pinmap or schematic net labels to match.",
+    maturity: "experimental"
+  }
+};
+function makeFinding(input) {
+  const rule = ruleDefinitions[input.ruleId];
+  return {
+    ruleId: input.ruleId,
+    title: rule.title,
+    severity: input.severity ?? rule.defaultSeverity,
+    message: input.message,
+    remediation: rule.remediation,
+    locations: input.locations ?? []
+  };
+}
+
 // src/core/config.ts
 async function loadConfig(scanRoot, configInput) {
   const candidate = configInput ? resolveFrom(scanRoot, configInput) : import_node_path4.default.join(scanRoot, "boardguard.yml");
@@ -101290,33 +101454,120 @@ async function loadConfig(scanRoot, configInput) {
 }
 function validateConfig(config) {
   const errors = [];
-  allowKeys(config, ["version", "project", "reports", "manufacturing", "bom", "firmware", "rules"], "config", errors);
-  if (config.version !== void 0 && config.version !== 1) {
+  if (!isPlainObject3(config)) {
+    return ["configuration must be an object"];
+  }
+  const root = config;
+  allowKeys(root, ["version", "project", "reports", "manufacturing", "bom", "firmware", "kicad", "rules"], "config", errors);
+  if (root.version !== void 0 && root.version !== 1) {
     errors.push("version must be 1");
   }
-  if (config.project) {
-    allowKeys(config.project, ["path", "require_kicad_cli"], "project", errors);
+  const project = root.project;
+  if (project !== void 0) {
+    if (!isPlainObject3(project)) {
+      errors.push("project must be an object");
+    } else {
+      allowKeys(project, ["path", "require_kicad_cli"], "project", errors);
+      validateOptionalString(project.path, "project.path", errors);
+      validateOptionalBoolean(project.require_kicad_cli, "project.require_kicad_cli", errors);
+    }
   }
-  if (config.reports) {
-    allowKeys(config.reports, ["json", "sarif", "markdown"], "reports", errors);
+  const reports = root.reports;
+  if (reports !== void 0) {
+    if (!isPlainObject3(reports)) {
+      errors.push("reports must be an object");
+    } else {
+      allowKeys(reports, ["json", "sarif", "markdown"], "reports", errors);
+      validateOptionalBoolean(reports.json, "reports.json", errors);
+      validateOptionalBoolean(reports.sarif, "reports.sarif", errors);
+      validateOptionalBoolean(reports.markdown, "reports.markdown", errors);
+    }
   }
-  if (config.manufacturing) {
-    allowKeys(config.manufacturing, ["board_name", "revision", "output_dir", "expected_artifacts"], "manufacturing", errors);
+  const manufacturing = root.manufacturing;
+  if (manufacturing !== void 0) {
+    if (!isPlainObject3(manufacturing)) {
+      errors.push("manufacturing must be an object");
+    } else {
+      allowKeys(manufacturing, ["board_name", "revision", "output_dir", "expected_artifacts"], "manufacturing", errors);
+      validateOptionalString(manufacturing.board_name, "manufacturing.board_name", errors);
+      validateOptionalString(manufacturing.revision, "manufacturing.revision", errors);
+      validateOptionalString(manufacturing.output_dir, "manufacturing.output_dir", errors);
+      if (manufacturing.expected_artifacts !== void 0) {
+        if (!isPlainObject3(manufacturing.expected_artifacts)) {
+          errors.push("manufacturing.expected_artifacts must be an object");
+        } else {
+          for (const [key, value] of Object.entries(manufacturing.expected_artifacts)) {
+            if (typeof value !== "boolean") {
+              errors.push(`manufacturing.expected_artifacts.${key} must be a boolean`);
+            }
+          }
+        }
+      }
+    }
   }
-  if (config.bom) {
-    allowKeys(config.bom, ["input", "required_fields"], "bom", errors);
+  const bom = root.bom;
+  if (bom !== void 0) {
+    if (!isPlainObject3(bom)) {
+      errors.push("bom must be an object");
+    } else {
+      allowKeys(bom, ["input", "required_fields"], "bom", errors);
+      validateOptionalString(bom.input, "bom.input", errors);
+      if (bom.required_fields !== void 0 && (!Array.isArray(bom.required_fields) || bom.required_fields.some((entry) => typeof entry !== "string" || entry.trim() === ""))) {
+        errors.push("bom.required_fields must be an array of non-empty strings");
+      }
+    }
   }
-  if (config.firmware) {
-    allowKeys(config.firmware, ["pinmap"], "firmware", errors);
+  const firmware = root.firmware;
+  if (firmware !== void 0) {
+    if (!isPlainObject3(firmware)) {
+      errors.push("firmware must be an object");
+    } else {
+      allowKeys(firmware, ["pinmap"], "firmware", errors);
+      validateOptionalString(firmware.pinmap, "firmware.pinmap", errors);
+    }
   }
-  if (config.project?.path !== void 0 && typeof config.project.path !== "string") {
-    errors.push("project.path must be a string");
+  const kicad = root.kicad;
+  if (kicad !== void 0) {
+    if (!isPlainObject3(kicad)) {
+      errors.push("kicad must be an object");
+    } else {
+      allowKeys(kicad, ["enabled", "min_version", "drc", "erc"], "kicad", errors);
+      validateOptionalBoolean(kicad.enabled, "kicad.enabled", errors);
+      validateOptionalString(kicad.min_version, "kicad.min_version", errors);
+      if (kicad.drc !== void 0) {
+        if (!isPlainObject3(kicad.drc)) {
+          errors.push("kicad.drc must be an object");
+        } else {
+          allowKeys(kicad.drc, ["severity", "schematic_parity", "refill_zones", "severity_exclusions"], "kicad.drc", errors);
+          validateSeveritySelector(kicad.drc.severity, "kicad.drc.severity", errors);
+          validateOptionalBoolean(kicad.drc.schematic_parity, "kicad.drc.schematic_parity", errors);
+          validateOptionalBoolean(kicad.drc.refill_zones, "kicad.drc.refill_zones", errors);
+          validateOptionalBoolean(kicad.drc.severity_exclusions, "kicad.drc.severity_exclusions", errors);
+        }
+      }
+      if (kicad.erc !== void 0) {
+        if (!isPlainObject3(kicad.erc)) {
+          errors.push("kicad.erc must be an object");
+        } else {
+          allowKeys(kicad.erc, ["severity", "severity_exclusions"], "kicad.erc", errors);
+          validateSeveritySelector(kicad.erc.severity, "kicad.erc.severity", errors);
+          validateOptionalBoolean(kicad.erc.severity_exclusions, "kicad.erc.severity_exclusions", errors);
+        }
+      }
+    }
   }
-  if (config.project?.require_kicad_cli !== void 0 && typeof config.project.require_kicad_cli !== "boolean") {
-    errors.push("project.require_kicad_cli must be a boolean");
-  }
-  if (config.rules) {
-    for (const [ruleId, severity] of Object.entries(config.rules)) {
+  const rules = root.rules;
+  if (rules !== void 0) {
+    if (!isPlainObject3(rules)) {
+      errors.push("rules must be an object");
+      return errors.sort();
+    }
+    const knownRuleIds = new Set(Object.keys(ruleDefinitions));
+    for (const [ruleId, severity] of Object.entries(rules)) {
+      if (!knownRuleIds.has(ruleId)) {
+        errors.push(`rules.${ruleId} is not a known BoardGuard rule`);
+        continue;
+      }
       if (severity === "error" || severity === "warning" || severity === "off") {
         continue;
       }
@@ -101348,6 +101599,16 @@ function configuredSeverity(config, ruleId) {
   }
   return configured;
 }
+function applyConfiguredFinding(finding, config) {
+  const severity = configuredSeverity(config, finding.ruleId);
+  if (severity === "off") {
+    return void 0;
+  }
+  if (severity) {
+    return { ...finding, severity };
+  }
+  return finding;
+}
 function manufacturingPlan(config) {
   const manufacturing = config?.manufacturing;
   if (!manufacturing) {
@@ -101360,9 +101621,232 @@ function manufacturingPlan(config) {
     expectedArtifacts: manufacturing.expected_artifacts ?? {}
   };
 }
+function validateOptionalBoolean(value, name, errors) {
+  if (value !== void 0 && typeof value !== "boolean") {
+    errors.push(`${name} must be a boolean`);
+  }
+}
+function validateOptionalString(value, name, errors) {
+  if (value !== void 0 && typeof value !== "string") {
+    errors.push(`${name} must be a string`);
+  }
+}
+function validateSeveritySelector(value, name, errors) {
+  if (value !== void 0 && value !== "all" && value !== "error" && value !== "warning") {
+    errors.push(`${name} must be all, error, or warning`);
+  }
+}
+function isPlainObject3(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
 
 // src/core/discovery.ts
+var import_promises6 = __toESM(require("node:fs/promises"), 1);
 var import_node_path5 = __toESM(require("node:path"), 1);
+
+// src/kicad/sexpr.ts
+function parseSExpression(input) {
+  const tokens = tokenize(input);
+  const stack = [];
+  let root;
+  for (const token of tokens) {
+    if (token === "(") {
+      const list = [];
+      if (stack.length > 0) {
+        stack[stack.length - 1].push(list);
+      }
+      stack.push(list);
+      if (!root) {
+        root = list;
+      }
+      continue;
+    }
+    if (token === ")") {
+      if (stack.length === 0) {
+        throw new Error("unexpected closing parenthesis");
+      }
+      stack.pop();
+      continue;
+    }
+    if (stack.length === 0) {
+      throw new Error("token outside expression");
+    }
+    stack[stack.length - 1].push(token);
+  }
+  if (stack.length !== 0 || !root) {
+    throw new Error("unbalanced S-expression");
+  }
+  return root;
+}
+function tokenize(input) {
+  const tokens = [];
+  let i = 0;
+  while (i < input.length) {
+    const char = input[i];
+    if (/\s/.test(char)) {
+      i += 1;
+      continue;
+    }
+    if (char === "(" || char === ")") {
+      tokens.push(char);
+      i += 1;
+      continue;
+    }
+    if (char === '"') {
+      let value2 = "";
+      let closed = false;
+      i += 1;
+      while (i < input.length) {
+        const current = input[i];
+        if (current === "\\" && i + 1 < input.length) {
+          value2 += input[i + 1];
+          i += 2;
+          continue;
+        }
+        if (current === '"') {
+          i += 1;
+          closed = true;
+          break;
+        }
+        value2 += current;
+        i += 1;
+      }
+      if (!closed) {
+        throw new Error("unterminated quoted string");
+      }
+      tokens.push(value2);
+      continue;
+    }
+    let value = "";
+    while (i < input.length && !/\s|\(|\)/.test(input[i])) {
+      value += input[i];
+      i += 1;
+    }
+    tokens.push(value);
+  }
+  return tokens;
+}
+
+// src/kicad/schematic.ts
+async function parseSchematic(file) {
+  try {
+    const text = await readTextFile(file);
+    if (text.trim().length < 32 || !text.includes("(kicad_sch")) {
+      return { valid: false, reason: "schematic file is suspiciously small or missing kicad_sch root", components: [], netLabels: [], sheetFiles: [] };
+    }
+    parseSExpression(text);
+    return {
+      valid: true,
+      components: extractComponents(text, file),
+      netLabels: extractNetLabels(text).sort(),
+      sheetFiles: extractSheetFiles(text).sort()
+    };
+  } catch (error2) {
+    return {
+      valid: false,
+      reason: error2 instanceof Error ? error2.message : "schematic file could not be parsed",
+      components: [],
+      netLabels: [],
+      sheetFiles: []
+    };
+  }
+}
+function extractComponents(text, sourcePath) {
+  const components = [];
+  let index = 0;
+  while (index < text.length) {
+    const symbolStart = text.indexOf("(symbol", index);
+    if (symbolStart === -1) {
+      break;
+    }
+    const symbolText = balancedSlice(text, symbolStart);
+    if (!symbolText) {
+      break;
+    }
+    if (!/\(lib_id\s+/.test(symbolText)) {
+      index = symbolStart + symbolText.length;
+      continue;
+    }
+    const properties = /* @__PURE__ */ new Map();
+    const propertyPattern = /\(property\s+"([^"]+)"\s+"([^"]*)"/g;
+    for (const match of symbolText.matchAll(propertyPattern)) {
+      properties.set(match[1].toLowerCase(), match[2]);
+    }
+    const reference = properties.get("reference");
+    if (reference && !reference.startsWith("#")) {
+      components.push({
+        reference,
+        value: properties.get("value"),
+        footprint: properties.get("footprint"),
+        manufacturer: properties.get("manufacturer") ?? properties.get("mfr"),
+        mpn: properties.get("mpn") ?? properties.get("manufacturer part number") ?? properties.get("mfr part number"),
+        sourcePath,
+        source: "schematic",
+        line: lineForIndex(text, symbolStart),
+        dnp: isTruthy(properties.get("dnp") ?? properties.get("do not populate") ?? properties.get("exclude from bom"))
+      });
+    }
+    index = symbolStart + symbolText.length;
+  }
+  return components.sort((a, b) => a.reference.localeCompare(b.reference));
+}
+function isTruthy(value) {
+  return value !== void 0 && /^(1|true|yes|y|dnp)$/i.test(value.trim());
+}
+function extractNetLabels(text) {
+  const labels = /* @__PURE__ */ new Set();
+  const labelPattern = /\((?:label|global_label|hierarchical_label)\s+"([^"]+)"/g;
+  for (const match of text.matchAll(labelPattern)) {
+    labels.add(match[1]);
+  }
+  return [...labels];
+}
+function extractSheetFiles(text) {
+  const sheets = /* @__PURE__ */ new Set();
+  const propertyPattern = /\(property\s+"Sheet file"\s+"([^"]+)"/g;
+  for (const match of text.matchAll(propertyPattern)) {
+    const value = match[1].trim();
+    if (value !== "") {
+      sheets.add(value);
+    }
+  }
+  return [...sheets];
+}
+function balancedSlice(text, start) {
+  let depth = 0;
+  let inString = false;
+  for (let i = start; i < text.length; i += 1) {
+    const char = text[i];
+    if (char === '"' && !isEscaped(text, i)) {
+      inString = !inString;
+    }
+    if (inString) {
+      continue;
+    }
+    if (char === "(") {
+      depth += 1;
+    }
+    if (char === ")") {
+      depth -= 1;
+      if (depth === 0) {
+        return text.slice(start, i + 1);
+      }
+    }
+  }
+  return void 0;
+}
+function isEscaped(text, quoteIndex) {
+  let backslashes = 0;
+  for (let i = quoteIndex - 1; i >= 0 && text[i] === "\\"; i -= 1) {
+    backslashes += 1;
+  }
+  return backslashes % 2 === 1;
+}
+function lineForIndex(text, index) {
+  return text.slice(0, index).split("\n").length;
+}
+
+// src/core/discovery.ts
 async function discoverProjects(rootInput, explicitProject) {
   const scanRoot = import_node_path5.default.resolve(rootInput);
   let projectFiles;
@@ -101383,6 +101867,7 @@ async function discoverProjects(rootInput, explicitProject) {
   }
   projectFiles.sort((a, b) => a.localeCompare(b));
   const projects = [];
+  const diagnostics = [];
   for (const projectFile of projectFiles) {
     const root = import_node_path5.default.dirname(projectFile);
     const base = import_node_path5.default.basename(projectFile, ".kicad_pro");
@@ -101396,11 +101881,11 @@ async function discoverProjects(rootInput, explicitProject) {
       allowedExtensions: [".kicad_sch", ".kicad_pcb"],
       maxDepth: 1
     });
-    const schematicFiles = associatedSchematicFiles(designFiles.filter((file) => file.endsWith(".kicad_sch")), base, siblingProjectBases);
+    const schematicFiles = await associatedSchematicFiles(root, designFiles.filter((file) => file.endsWith(".kicad_sch")), base, siblingProjectBases, diagnostics);
     const boardFiles = associatedBoardFiles(designFiles.filter((file) => file.endsWith(".kicad_pcb")), base);
     projects.push({ projectFile, root, schematicFiles, boardFiles });
   }
-  return { scanRoot, explicit, projectFiles, projects };
+  return { scanRoot, explicit, projectFiles, projects, diagnostics };
 }
 function scoreAssociated(base, file) {
   return import_node_path5.default.basename(file, import_node_path5.default.extname(file)) === base ? 0 : 1;
@@ -101409,7 +101894,7 @@ function associatedBoardFiles(files, base) {
   const exact = files.filter((file) => scoreAssociated(base, file) === 0);
   return exact.length > 0 ? exact : files;
 }
-function associatedSchematicFiles(files, base, siblingProjectBases) {
+async function associatedSchematicFiles(root, files, base, siblingProjectBases, diagnostics) {
   const exact = files.filter((file) => scoreAssociated(base, file) === 0);
   if (exact.length === 0) {
     return files;
@@ -101418,11 +101903,80 @@ function associatedSchematicFiles(files, base, siblingProjectBases) {
     const fileBase = import_node_path5.default.basename(file, import_node_path5.default.extname(file));
     return fileBase === base || !siblingProjectBases.has(fileBase);
   });
-  return sheets;
+  const hierarchy = await discoverSchematicHierarchy(exact[0], root, diagnostics);
+  return uniqueByRealpathPreserve([...sheets, ...hierarchy]);
+}
+async function discoverSchematicHierarchy(rootSchematic, projectRoot, diagnostics) {
+  const files = [];
+  const visited = /* @__PURE__ */ new Set();
+  const stack = /* @__PURE__ */ new Set();
+  const realProjectRoot = await safeRealpath(projectRoot);
+  if (!realProjectRoot) {
+    diagnostics.push({ path: projectRoot, message: "Project root is missing or inaccessible while resolving schematic hierarchy." });
+    return [];
+  }
+  const projectRootRealPath = realProjectRoot;
+  async function visit(file, isRoot = false) {
+    const realFile = await safeRealpath(file);
+    if (!realFile || !isInside2(projectRootRealPath, realFile)) {
+      diagnostics.push({ path: file, message: isRoot ? "Root schematic is missing or outside the project root." : "Referenced schematic sheet is missing or outside the project root." });
+      return;
+    }
+    if (stack.has(realFile)) {
+      diagnostics.push({ path: file, message: "Referenced schematic sheet cycle was detected." });
+      return;
+    }
+    if (visited.has(realFile)) {
+      return;
+    }
+    visited.add(realFile);
+    stack.add(realFile);
+    files.push(realFile);
+    const parsed = await parseSchematic(realFile);
+    if (!parsed.valid) {
+      if (!isRoot) {
+        diagnostics.push({ path: realFile, message: `Referenced schematic sheet could not be parsed: ${parsed.reason ?? "unknown error"}.` });
+      }
+      stack.delete(realFile);
+      return;
+    }
+    for (const sheetFile of parsed.sheetFiles) {
+      await visit(import_node_path5.default.resolve(import_node_path5.default.dirname(realFile), sheetFile));
+    }
+    stack.delete(realFile);
+  }
+  await visit(rootSchematic, true);
+  return uniqueSorted(files);
+}
+async function safeRealpath(file) {
+  try {
+    return await import_promises6.default.realpath(file);
+  } catch {
+    return void 0;
+  }
+}
+function isInside2(root, candidate) {
+  const relative2 = import_node_path5.default.relative(root, candidate);
+  return relative2 === "" || !relative2.startsWith("..") && !import_node_path5.default.isAbsolute(relative2);
+}
+function uniqueSorted(files) {
+  return [...new Set(files)].sort((a, b) => a.localeCompare(b));
+}
+async function uniqueByRealpathPreserve(files) {
+  const seen = /* @__PURE__ */ new Set();
+  const unique = [];
+  for (const file of files) {
+    const key = await safeRealpath(file) ?? import_node_path5.default.resolve(file);
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(file);
+    }
+  }
+  return unique;
 }
 
 // src/kicad/cli.ts
-var import_promises6 = __toESM(require("node:fs/promises"), 1);
+var import_promises7 = __toESM(require("node:fs/promises"), 1);
 var import_node_os3 = __toESM(require("node:os"), 1);
 var import_node_path6 = __toESM(require("node:path"), 1);
 
@@ -101540,7 +102094,17 @@ function redactControlCharacters(value) {
 }
 
 // src/kicad/cli.ts
-async function runKicadChecks(projects, cliPathInput) {
+async function runKicadChecks(projects, cliPathInput, options) {
+  if (options?.enabled === false) {
+    return {
+      cli: {
+        found: false,
+        ercStatus: "skipped",
+        drcStatus: "skipped"
+      },
+      findings: []
+    };
+  }
   const detected = await detectKicadCli(cliPathInput);
   const cli = {
     found: detected.found,
@@ -101553,6 +102117,10 @@ async function runKicadChecks(projects, cliPathInput) {
   if (!detected.found || !detected.path) {
     return { cli, findings };
   }
+  const help = {
+    erc: await kicadHelp(detected.path, ["sch", "erc"]),
+    drc: await kicadHelp(detected.path, ["pcb", "drc"])
+  };
   let ercRan = false;
   let drcRan = false;
   let ercFailed = false;
@@ -101560,13 +102128,13 @@ async function runKicadChecks(projects, cliPathInput) {
   for (const project of projects) {
     for (const schematic of project.schematicFiles) {
       ercRan = true;
-      const result = await runKicadReport(detected.path, ["sch", "erc"], schematic, "erc");
+      const result = await runKicadReport(detected.path, ["sch", "erc"], schematic, "erc", help.erc, options);
       ercFailed ||= result.status === "failed";
       findings.push(...result.findings);
     }
     for (const board of project.boardFiles) {
       drcRan = true;
-      const result = await runKicadReport(detected.path, ["pcb", "drc"], board, "drc");
+      const result = await runKicadReport(detected.path, ["pcb", "drc"], board, "drc", help.drc, options);
       drcFailed ||= result.status === "failed";
       findings.push(...result.findings);
     }
@@ -101600,18 +102168,18 @@ async function detectKicadCli(cliPathInput) {
   }
   return { found: false };
 }
-async function runKicadReport(cliPath, command, inputFile, kind) {
-  const tempDir = await import_promises6.default.mkdtemp(import_node_path6.default.join(import_node_os3.default.tmpdir(), "boardguard-"));
+async function runKicadReport(cliPath, command, inputFile, kind, helpText, options) {
+  const tempDir = await import_promises7.default.mkdtemp(import_node_path6.default.join(import_node_os3.default.tmpdir(), "boardguard-"));
   const output = import_node_path6.default.join(tempDir, `${kind}.json`);
-  const args = [...command, "--format", "json", "--output", output, "--exit-code-violations", inputFile];
+  const args = buildKicadReportArgs(command, output, inputFile, kind, helpText, options);
   const result = await runProcess(cliPath, args, { timeoutMs: 12e4, maxStdoutBytes: 128 * 1024, maxStderrBytes: 128 * 1024 });
   let reportText = "";
   try {
-    reportText = await import_promises6.default.readFile(output, "utf8");
+    reportText = await import_promises7.default.readFile(output, "utf8");
   } catch {
     reportText = "";
   } finally {
-    await import_promises6.default.rm(tempDir, { recursive: true, force: true }).catch(() => void 0);
+    await import_promises7.default.rm(tempDir, { recursive: true, force: true }).catch(() => void 0);
   }
   const outputText = redactControlCharacters(`${result.stdout}
 ${result.stderr}
@@ -101630,6 +102198,37 @@ ${reportText}`.trim());
     status: "failed",
     findings: [{ kind, message: outputText || `KiCad ${kind.toUpperCase()} exited with code ${result.code ?? "unknown"}`, path: inputFile }]
   };
+}
+async function kicadHelp(cliPath, command) {
+  const result = await runProcess(cliPath, [...command, "--help"], { timeoutMs: 1e4, maxStdoutBytes: 128 * 1024, maxStderrBytes: 128 * 1024 });
+  return `${result.stdout}
+${result.stderr}`;
+}
+function buildKicadReportArgs(command, output, inputFile, kind, helpText, options) {
+  const args = [...command, "--format", "json", "--output", output, "--exit-code-violations"];
+  const checkOptions = kind === "erc" ? options?.erc : options?.drc;
+  if (checkOptions?.severity) {
+    pushSupported(args, helpText, `--severity-${checkOptions.severity}`);
+  }
+  if (checkOptions?.severity_exclusions === true) {
+    pushSupported(args, helpText, "--severity-exclusions");
+  }
+  if (kind === "drc") {
+    const drc = options?.drc;
+    if (drc?.schematic_parity === true) {
+      pushSupported(args, helpText, "--schematic-parity");
+    }
+    if (drc?.refill_zones === true) {
+      pushSupported(args, helpText, "--refill-zones");
+    }
+  }
+  args.push(inputFile);
+  return args;
+}
+function pushSupported(args, helpText, flag) {
+  if (helpText.includes(flag)) {
+    args.push(flag);
+  }
 }
 function normalizeKicadFindings(kind, fallbackPath, reportText) {
   if (!reportText.trim()) {
@@ -101694,112 +102293,6 @@ function numberField(row, names) {
   return void 0;
 }
 
-// src/core/findings.ts
-var ruleDefinitions = {
-  "BG-CONFIG-001": {
-    id: "BG-CONFIG-001",
-    title: "BoardGuard configuration is invalid",
-    defaultSeverity: "high",
-    remediation: "Fix boardguard.yml so it matches the documented version 1 schema.",
-    maturity: "implemented"
-  },
-  "BG-PROJ-001": {
-    id: "BG-PROJ-001",
-    title: "no KiCad project found",
-    defaultSeverity: "high",
-    remediation: "Set the project input to the directory containing the KiCad project or add a .kicad_pro file.",
-    maturity: "implemented"
-  },
-  "BG-PROJ-002": {
-    id: "BG-PROJ-002",
-    title: "multiple KiCad projects found without explicit selection",
-    defaultSeverity: "medium",
-    remediation: "Set the project input to the intended .kicad_pro path.",
-    maturity: "implemented"
-  },
-  "BG-PROJ-003": {
-    id: "BG-PROJ-003",
-    title: "KiCad project is missing schematic or board file",
-    defaultSeverity: "high",
-    remediation: "Add the missing design file or configure BoardGuard to scan the correct project path.",
-    maturity: "implemented"
-  },
-  "BG-PROJ-004": {
-    id: "BG-PROJ-004",
-    title: "KiCad design file appears malformed or unreadable",
-    defaultSeverity: "high",
-    remediation: "Open and save the project in KiCad or restore the valid file.",
-    maturity: "implemented"
-  },
-  "BG-KICAD-001": {
-    id: "BG-KICAD-001",
-    title: "kicad-cli is unavailable",
-    defaultSeverity: "medium",
-    remediation: "Install KiCad CLI or configure kicad-cli-path.",
-    maturity: "implemented"
-  },
-  "BG-ERC-001": {
-    id: "BG-ERC-001",
-    title: "KiCad ERC failed",
-    defaultSeverity: "high",
-    remediation: "Fix ERC violations in the schematic before merging.",
-    maturity: "partial"
-  },
-  "BG-DRC-001": {
-    id: "BG-DRC-001",
-    title: "KiCad DRC failed",
-    defaultSeverity: "high",
-    remediation: "Fix DRC violations in the PCB before merging.",
-    maturity: "partial"
-  },
-  "BG-BOM-001": {
-    id: "BG-BOM-001",
-    title: "component is missing manufacturer part metadata",
-    defaultSeverity: "medium",
-    remediation: "Add manufacturer and manufacturer part number metadata.",
-    maturity: "partial"
-  },
-  "BG-BOM-002": {
-    id: "BG-BOM-002",
-    title: "duplicate component designator found",
-    defaultSeverity: "high",
-    remediation: "Re-annotate or correct duplicated designators.",
-    maturity: "implemented"
-  },
-  "BG-MFG-001": {
-    id: "BG-MFG-001",
-    title: "manufacturing release metadata is missing",
-    defaultSeverity: "medium",
-    remediation: "Add boardguard.yml with board name, revision, output profile, and release artifact policy.",
-    maturity: "implemented"
-  },
-  "BG-MFG-002": {
-    id: "BG-MFG-002",
-    title: "manufacturing output plan is incomplete",
-    defaultSeverity: "medium",
-    remediation: "Update boardguard.yml to declare expected manufacturing artifacts.",
-    maturity: "implemented"
-  },
-  "BG-PIN-001": {
-    id: "BG-PIN-001",
-    title: "firmware pinmap is inconsistent with declared hardware mapping",
-    defaultSeverity: "high",
-    remediation: "Update firmware pinmap or schematic net labels to match.",
-    maturity: "experimental"
-  }
-};
-function makeFinding(input) {
-  const rule = ruleDefinitions[input.ruleId];
-  return {
-    ruleId: input.ruleId,
-    title: rule.title,
-    severity: input.severity ?? rule.defaultSeverity,
-    message: input.message,
-    remediation: rule.remediation,
-    locations: input.locations ?? []
-  };
-}
-
 // src/kicad/project.ts
 async function validateProjectFile(file) {
   try {
@@ -101812,195 +102305,6 @@ async function validateProjectFile(file) {
   } catch (error2) {
     return { ok: false, reason: error2 instanceof Error ? error2.message : "file could not be read" };
   }
-}
-
-// src/kicad/sexpr.ts
-function parseSExpression(input) {
-  const tokens = tokenize(input);
-  const stack = [];
-  let root;
-  for (const token of tokens) {
-    if (token === "(") {
-      const list = [];
-      if (stack.length > 0) {
-        stack[stack.length - 1].push(list);
-      }
-      stack.push(list);
-      if (!root) {
-        root = list;
-      }
-      continue;
-    }
-    if (token === ")") {
-      if (stack.length === 0) {
-        throw new Error("unexpected closing parenthesis");
-      }
-      stack.pop();
-      continue;
-    }
-    if (stack.length === 0) {
-      throw new Error("token outside expression");
-    }
-    stack[stack.length - 1].push(token);
-  }
-  if (stack.length !== 0 || !root) {
-    throw new Error("unbalanced S-expression");
-  }
-  return root;
-}
-function tokenize(input) {
-  const tokens = [];
-  let i = 0;
-  while (i < input.length) {
-    const char = input[i];
-    if (/\s/.test(char)) {
-      i += 1;
-      continue;
-    }
-    if (char === "(" || char === ")") {
-      tokens.push(char);
-      i += 1;
-      continue;
-    }
-    if (char === '"') {
-      let value2 = "";
-      let closed = false;
-      i += 1;
-      while (i < input.length) {
-        const current = input[i];
-        if (current === "\\" && i + 1 < input.length) {
-          value2 += input[i + 1];
-          i += 2;
-          continue;
-        }
-        if (current === '"') {
-          i += 1;
-          closed = true;
-          break;
-        }
-        value2 += current;
-        i += 1;
-      }
-      if (!closed) {
-        throw new Error("unterminated quoted string");
-      }
-      tokens.push(value2);
-      continue;
-    }
-    let value = "";
-    while (i < input.length && !/\s|\(|\)/.test(input[i])) {
-      value += input[i];
-      i += 1;
-    }
-    tokens.push(value);
-  }
-  return tokens;
-}
-
-// src/kicad/schematic.ts
-async function parseSchematic(file) {
-  try {
-    const text = await readTextFile(file);
-    if (text.trim().length < 32 || !text.includes("(kicad_sch")) {
-      return { valid: false, reason: "schematic file is suspiciously small or missing kicad_sch root", components: [], netLabels: [] };
-    }
-    parseSExpression(text);
-    return {
-      valid: true,
-      components: extractComponents(text, file),
-      netLabels: extractNetLabels(text).sort()
-    };
-  } catch (error2) {
-    return {
-      valid: false,
-      reason: error2 instanceof Error ? error2.message : "schematic file could not be parsed",
-      components: [],
-      netLabels: []
-    };
-  }
-}
-function extractComponents(text, sourcePath) {
-  const components = [];
-  let index = 0;
-  while (index < text.length) {
-    const symbolStart = text.indexOf("(symbol", index);
-    if (symbolStart === -1) {
-      break;
-    }
-    const symbolText = balancedSlice(text, symbolStart);
-    if (!symbolText) {
-      break;
-    }
-    if (!/\(lib_id\s+/.test(symbolText)) {
-      index = symbolStart + symbolText.length;
-      continue;
-    }
-    const properties = /* @__PURE__ */ new Map();
-    const propertyPattern = /\(property\s+"([^"]+)"\s+"([^"]*)"/g;
-    for (const match of symbolText.matchAll(propertyPattern)) {
-      properties.set(match[1].toLowerCase(), match[2]);
-    }
-    const reference = properties.get("reference");
-    if (reference && !reference.startsWith("#")) {
-      components.push({
-        reference,
-        value: properties.get("value"),
-        footprint: properties.get("footprint"),
-        manufacturer: properties.get("manufacturer") ?? properties.get("mfr"),
-        mpn: properties.get("mpn") ?? properties.get("manufacturer part number") ?? properties.get("mfr part number"),
-        sourcePath,
-        source: "schematic",
-        line: lineForIndex(text, symbolStart),
-        dnp: isTruthy(properties.get("dnp") ?? properties.get("do not populate") ?? properties.get("exclude from bom"))
-      });
-    }
-    index = symbolStart + symbolText.length;
-  }
-  return components.sort((a, b) => a.reference.localeCompare(b.reference));
-}
-function isTruthy(value) {
-  return value !== void 0 && /^(1|true|yes|y|dnp)$/i.test(value.trim());
-}
-function extractNetLabels(text) {
-  const labels = /* @__PURE__ */ new Set();
-  const labelPattern = /\((?:label|global_label|hierarchical_label)\s+"([^"]+)"/g;
-  for (const match of text.matchAll(labelPattern)) {
-    labels.add(match[1]);
-  }
-  return [...labels];
-}
-function balancedSlice(text, start) {
-  let depth = 0;
-  let inString = false;
-  for (let i = start; i < text.length; i += 1) {
-    const char = text[i];
-    if (char === '"' && !isEscaped(text, i)) {
-      inString = !inString;
-    }
-    if (inString) {
-      continue;
-    }
-    if (char === "(") {
-      depth += 1;
-    }
-    if (char === ")") {
-      depth -= 1;
-      if (depth === 0) {
-        return text.slice(start, i + 1);
-      }
-    }
-  }
-  return void 0;
-}
-function isEscaped(text, quoteIndex) {
-  let backslashes = 0;
-  for (let i = quoteIndex - 1; i >= 0 && text[i] === "\\"; i -= 1) {
-    backslashes += 1;
-  }
-  return backslashes % 2 === 1;
-}
-function lineForIndex(text, index) {
-  return text.slice(0, index).split("\n").length;
 }
 
 // src/kicad/pcb.ts
@@ -102022,19 +102326,26 @@ async function projectFindings(discovery, config) {
   const findings = [];
   const root = discovery.scanRoot;
   if (discovery.projectFiles.length === 0) {
-    findings.push(applyConfigured(config, makeFinding({
+    pushConfigured(findings, makeFinding({
       ruleId: "BG-PROJ-001",
       message: "No .kicad_pro file was found under the configured scan path.",
       locations: [{ path: "." }]
-    })));
+    }), config);
     return findings;
   }
   if (!discovery.explicit && discovery.projectFiles.length > 1) {
-    findings.push(applyConfigured(config, makeFinding({
+    pushConfigured(findings, makeFinding({
       ruleId: "BG-PROJ-002",
       message: `${discovery.projectFiles.length} KiCad projects were found without an explicit project selection.`,
       locations: discovery.projectFiles.map((file) => ({ path: normalizeRelative(root, file), line: 1, column: 1 }))
-    })));
+    }), config);
+  }
+  for (const diagnostic of discovery.diagnostics) {
+    pushConfigured(findings, makeFinding({
+      ruleId: "BG-PROJ-004",
+      message: diagnostic.message,
+      locations: [{ path: normalizeRelative(root, diagnostic.path), line: 1, column: 1 }]
+    }), config);
   }
   for (const project of discovery.projects) {
     await validateProject(project, root, config, findings);
@@ -102042,52 +102353,72 @@ async function projectFindings(discovery, config) {
   return findings.sort(compareFindings);
 }
 async function validateProject(project, root, config, findings) {
+  if (await pushTooLargeFinding(project.projectFile, root, config, findings)) {
+    return;
+  }
   const projectValidation = await validateProjectFile(project.projectFile);
   if (!projectValidation.ok) {
-    findings.push(applyConfigured(config, makeFinding({
+    pushConfigured(findings, makeFinding({
       ruleId: "BG-PROJ-004",
       message: `Project file is malformed or unreadable: ${projectValidation.reason ?? "unknown error"}.`,
       locations: [{ path: normalizeRelative(root, project.projectFile), line: 1, column: 1 }]
-    })));
+    }), config);
   }
   if (project.schematicFiles.length === 0 || project.boardFiles.length === 0) {
     const missing = [
       project.schematicFiles.length === 0 ? "schematic" : "",
       project.boardFiles.length === 0 ? "board" : ""
     ].filter(Boolean).join(" and ");
-    findings.push(applyConfigured(config, makeFinding({
+    pushConfigured(findings, makeFinding({
       ruleId: "BG-PROJ-003",
       message: `Project ${normalizeRelative(root, project.projectFile)} is missing an associated ${missing} file.`,
       locations: [{ path: normalizeRelative(root, project.projectFile), line: 1, column: 1 }]
-    })));
+    }), config);
   }
   for (const schematic of project.schematicFiles) {
+    if (await pushTooLargeFinding(schematic, root, config, findings)) {
+      continue;
+    }
     const parsed = await parseSchematic(schematic);
     if (!parsed.valid) {
-      findings.push(applyConfigured(config, makeFinding({
+      pushConfigured(findings, makeFinding({
         ruleId: "BG-PROJ-004",
         message: `Schematic file is malformed or unreadable: ${parsed.reason ?? "unknown error"}.`,
         locations: [{ path: normalizeRelative(root, schematic), line: 1, column: 1 }]
-      })));
+      }), config);
     }
   }
   for (const board of project.boardFiles) {
+    if (await pushTooLargeFinding(board, root, config, findings)) {
+      continue;
+    }
     const parsed = await parsePcb(board);
     if (!parsed.valid) {
-      findings.push(applyConfigured(config, makeFinding({
+      pushConfigured(findings, makeFinding({
         ruleId: "BG-PROJ-004",
         message: `PCB file is malformed or unreadable: ${parsed.reason ?? "unknown error"}.`,
         locations: [{ path: normalizeRelative(root, board), line: 1, column: 1 }]
-      })));
+      }), config);
     }
   }
 }
-function applyConfigured(config, finding) {
-  const severity = configuredSeverity(config, finding.ruleId);
-  if (!severity || severity === "off") {
-    return finding;
+async function pushTooLargeFinding(file, root, config, findings) {
+  const tooLarge = await fileTooLarge(file);
+  if (!tooLarge) {
+    return false;
   }
-  return { ...finding, severity };
+  pushConfigured(findings, makeFinding({
+    ruleId: "BG-IO-TOO-LARGE",
+    message: `${normalizeRelative(root, file)} is ${tooLarge.size} bytes, exceeding the ${tooLarge.limit} byte BoardGuard safety limit for this file type.`,
+    locations: [{ path: normalizeRelative(root, file), line: 1, column: 1 }]
+  }), config);
+  return true;
+}
+function pushConfigured(findings, finding, config) {
+  const configured = applyConfiguredFinding(finding, config);
+  if (configured) {
+    findings.push(configured);
+  }
 }
 function compareFindings(a, b) {
   return a.ruleId.localeCompare(b.ruleId) || (a.locations[0]?.path ?? "").localeCompare(b.locations[0]?.path ?? "") || a.message.localeCompare(b.message);
@@ -102112,28 +102443,26 @@ function kicadAvailabilityFindings(kicad, requireKicad, config) {
 
 // src/rules/erc.ts
 function ercFindings(root, checks, config) {
-  return checks.filter((check) => check.kind === "erc").map((check) => {
-    const configured = configuredSeverity(config, "BG-ERC-001");
-    return makeFinding({
+  return checks.filter((check) => check.kind === "erc").flatMap((check) => {
+    const finding = applyConfiguredFinding(makeFinding({
       ruleId: "BG-ERC-001",
-      severity: configured === "off" ? "low" : configured,
       message: check.message,
       locations: [{ path: normalizeRelative(root, check.path), line: check.line ?? 1, column: check.column ?? 1 }]
-    });
-  }).filter((finding) => configuredSeverity(config, finding.ruleId) !== "off");
+    }), config);
+    return finding ? [finding] : [];
+  });
 }
 
 // src/rules/drc.ts
 function drcFindings(root, checks, config) {
-  return checks.filter((check) => check.kind === "drc").map((check) => {
-    const configured = configuredSeverity(config, "BG-DRC-001");
-    return makeFinding({
+  return checks.filter((check) => check.kind === "drc").flatMap((check) => {
+    const finding = applyConfiguredFinding(makeFinding({
       ruleId: "BG-DRC-001",
-      severity: configured === "off" ? "low" : configured,
       message: check.message,
       locations: [{ path: normalizeRelative(root, check.path), line: check.line ?? 1, column: check.column ?? 1 }]
-    });
-  }).filter((finding) => configuredSeverity(config, finding.ruleId) !== "off");
+    }), config);
+    return finding ? [finding] : [];
+  });
 }
 
 // src/rules/bom.ts
@@ -102276,13 +102605,22 @@ async function bomFindings(root, projects, bomInput, config) {
   }
   const configuredBom = bomInput ?? config?.bom?.input;
   const bomComponents = [];
+  const findings = [];
   if (configuredBom) {
     const bomPath = resolveFrom(root, configuredBom);
     if (await pathExists(bomPath)) {
-      bomComponents.push(...await parseBomCsv(bomPath));
+      const tooLarge = await fileTooLarge(bomPath);
+      if (tooLarge) {
+        pushConfigured2(findings, makeFinding({
+          ruleId: "BG-IO-TOO-LARGE",
+          message: `${normalizeRelative(root, bomPath)} is ${tooLarge.size} bytes, exceeding the ${tooLarge.limit} byte BoardGuard safety limit for this file type.`,
+          locations: [{ path: normalizeRelative(root, bomPath), line: 1, column: 1 }]
+        }), config);
+      } else {
+        bomComponents.push(...await parseBomCsv(bomPath));
+      }
     }
   }
-  const findings = [];
   findings.push(...duplicateFindings(root, schematicComponents, "schematic", config));
   findings.push(...duplicateFindings(root, bomComponents, "BOM", config));
   const reportedQuantityRows = /* @__PURE__ */ new Set();
@@ -102293,59 +102631,59 @@ async function bomFindings(root, projects, bomInput, config) {
     if (component.source === "bom") {
       for (const required of config?.bom?.required_fields ?? []) {
         if (!hasField(component.rawFields, required)) {
-          findings.push(applyConfigured2(config, makeFinding({
+          pushConfigured2(findings, makeFinding({
             ruleId: "BG-BOM-001",
             message: `BOM row for ${component.reference} is missing required field ${required}.`,
             locations: [locationFor(root, component)]
-          })));
+          }), config);
         }
       }
       if (component.rowQuantity !== void 0 && component.rowReferences && component.rowQuantity !== component.rowReferences.length) {
         const rowKey = `${component.sourcePath}:${component.line ?? 0}:${component.rowReferences.join(" ")}`;
         if (!reportedQuantityRows.has(rowKey)) {
           reportedQuantityRows.add(rowKey);
-          findings.push(applyConfigured2(config, makeFinding({
+          pushConfigured2(findings, makeFinding({
             ruleId: "BG-BOM-001",
             message: `BOM row for ${component.rowReferences.join(", ")} declares quantity ${component.rowQuantity} but lists ${component.rowReferences.length} designators.`,
             locations: [locationFor(root, component)]
-          })));
+          }), config);
         }
       }
     }
     if (!component.manufacturer || !component.mpn) {
-      findings.push(applyConfigured2(config, makeFinding({
+      pushConfigured2(findings, makeFinding({
         ruleId: "BG-BOM-001",
         message: `${component.source === "bom" ? "BOM row" : "Schematic component"} ${component.reference} is missing manufacturer or MPN metadata.`,
         locations: [locationFor(root, component)]
-      })));
+      }), config);
     }
     if (!component.value || !component.footprint) {
-      findings.push(applyConfigured2(config, makeFinding({
+      pushConfigured2(findings, makeFinding({
         ruleId: "BG-BOM-001",
         message: `${component.source === "bom" ? "BOM row" : "Schematic component"} ${component.reference} is missing value or footprint metadata.`,
         locations: [locationFor(root, component)]
-      })));
+      }), config);
     }
   }
   if (bomComponents.length > 0) {
     const schematicRefs = new Set(schematicComponents.filter((component) => !component.dnp).map((component) => component.reference));
     const bomRefs = new Set(bomComponents.filter((component) => !component.dnp).map((component) => component.reference));
     for (const component of schematicComponents.filter((entry) => !entry.dnp && !bomRefs.has(entry.reference))) {
-      findings.push(applyConfigured2(config, makeFinding({
+      pushConfigured2(findings, makeFinding({
         ruleId: "BG-BOM-001",
         message: `Schematic component ${component.reference} is missing from the BOM.`,
         locations: [locationFor(root, component)]
-      })));
+      }), config);
     }
     for (const component of bomComponents.filter((entry) => !entry.dnp && !schematicRefs.has(entry.reference))) {
-      findings.push(applyConfigured2(config, makeFinding({
+      pushConfigured2(findings, makeFinding({
         ruleId: "BG-BOM-001",
         message: `BOM row ${component.reference} does not match a parsed schematic component.`,
         locations: [locationFor(root, component)]
-      })));
+      }), config);
     }
   }
-  return findings.filter((finding) => configuredSeverity(config, finding.ruleId) !== "off").sort((a, b) => a.ruleId.localeCompare(b.ruleId) || a.message.localeCompare(b.message));
+  return findings.sort((a, b) => a.ruleId.localeCompare(b.ruleId) || a.message.localeCompare(b.message));
 }
 function duplicateFindings(root, components, label, config) {
   const findings = [];
@@ -102353,14 +102691,14 @@ function duplicateFindings(root, components, label, config) {
   for (const component of components) {
     const previous = seen.get(component.reference);
     if (previous) {
-      findings.push(applyConfigured2(config, makeFinding({
+      pushConfigured2(findings, makeFinding({
         ruleId: "BG-BOM-002",
         message: `Duplicate ${label} designator ${component.reference} was found.`,
         locations: [
           locationFor(root, previous),
           locationFor(root, component)
         ]
-      })));
+      }), config);
     } else {
       seen.set(component.reference, component);
     }
@@ -102381,12 +102719,11 @@ function hasField(row, field) {
   const wanted = field.trim().toLowerCase();
   return Object.entries(row).some(([key, value]) => key.trim().toLowerCase() === wanted && value.trim() !== "");
 }
-function applyConfigured2(config, finding) {
-  const severity = configuredSeverity(config, finding.ruleId);
-  if (!severity || severity === "off") {
-    return finding;
+function pushConfigured2(findings, finding, config) {
+  const configured = applyConfiguredFinding(finding, config);
+  if (configured) {
+    findings.push(configured);
   }
-  return { ...finding, severity };
 }
 
 // src/rules/manufacturing.ts
@@ -102394,13 +102731,12 @@ var expectedArtifactKeys = ["gerber", "drill", "bom", "cpl", "schematic_pdf", "p
 function manufacturingFindings(config) {
   const plan = manufacturingPlan(config);
   if (!plan) {
-    const severity = configuredSeverity(config, "BG-MFG-001");
-    return severity === "off" ? [] : [makeFinding({
+    const finding = applyConfiguredFinding(makeFinding({
       ruleId: "BG-MFG-001",
-      severity,
       message: "No boardguard.yml manufacturing release metadata was found.",
       locations: [{ path: "boardguard.yml", line: 1, column: 1 }]
-    })];
+    }), config);
+    return finding ? [finding] : [];
   }
   const findings = [];
   const missingMetadata = [
@@ -102408,29 +102744,31 @@ function manufacturingFindings(config) {
     plan.revision ? "" : "revision",
     plan.outputDir ? "" : "output_dir"
   ].filter(Boolean);
-  const metadataSeverity = configuredSeverity(config, "BG-MFG-001");
-  if (missingMetadata.length > 0 && metadataSeverity !== "off") {
-    findings.push(makeFinding({
+  if (missingMetadata.length > 0) {
+    pushConfigured3(findings, makeFinding({
       ruleId: "BG-MFG-001",
-      severity: metadataSeverity,
       message: `Manufacturing metadata is missing: ${missingMetadata.join(", ")}.`,
       locations: [{ path: "boardguard.yml", line: 1, column: 1 }]
-    }));
+    }), config);
   }
   const missingPlan = expectedArtifactKeys.filter((key) => typeof plan.expectedArtifacts[key] !== "boolean");
-  const planSeverity = configuredSeverity(config, "BG-MFG-002");
-  if (missingPlan.length > 0 && planSeverity !== "off") {
-    findings.push(makeFinding({
+  if (missingPlan.length > 0) {
+    pushConfigured3(findings, makeFinding({
       ruleId: "BG-MFG-002",
-      severity: planSeverity,
       message: `Manufacturing output plan is missing artifact flags: ${missingPlan.join(", ")}.`,
       locations: [{ path: "boardguard.yml", line: 1, column: 1 }]
-    }));
+    }), config);
   }
   return findings;
 }
 function exportPlan(config) {
   return manufacturingPlan(config);
+}
+function pushConfigured3(findings, finding, config) {
+  const configured = applyConfiguredFinding(finding, config);
+  if (configured) {
+    findings.push(configured);
+  }
 }
 
 // src/pinmap/pinmap.ts
@@ -102507,14 +102845,12 @@ async function pinmapFindings(root, projects, pinmapInput, config) {
   const pinmapPath = resolveFrom(root, configuredPinmap);
   const loaded = await loadPinmap(pinmapPath);
   const findings = [];
-  const severity = configuredSeverity(config, "BG-PIN-001");
   for (const error2 of loaded.errors) {
-    findings.push(makeFinding({
+    pushConfigured4(findings, makeFinding({
       ruleId: "BG-PIN-001",
-      severity: severity === "off" ? void 0 : severity,
       message: `Pinmap schema error: ${error2}.`,
       locations: [{ path: normalizeRelative(root, pinmapPath), line: 1, column: 1 }]
-    }));
+    }), config);
   }
   const labels = /* @__PURE__ */ new Set();
   for (const project of projects) {
@@ -102530,15 +102866,20 @@ async function pinmapFindings(root, projects, pinmapInput, config) {
   }
   for (const entry of loaded.entries) {
     if (!labels.has(entry.net)) {
-      findings.push(makeFinding({
+      pushConfigured4(findings, makeFinding({
         ruleId: "BG-PIN-001",
-        severity: severity === "off" ? void 0 : severity,
         message: `Pinmap net ${entry.net} for ${entry.designator}.${entry.pin} was not found in extracted schematic labels.`,
         locations: [{ path: normalizeRelative(root, pinmapPath), line: 1, column: 1 }]
-      }));
+      }), config);
     }
   }
   return findings.sort((a, b) => a.message.localeCompare(b.message));
+}
+function pushConfigured4(findings, finding, config) {
+  const configured = applyConfiguredFinding(finding, config);
+  if (configured) {
+    findings.push(configured);
+  }
 }
 
 // src/generated/version.ts
@@ -102546,13 +102887,17 @@ var boardGuardVersion = "0.2.0";
 
 // src/core/analyzer.ts
 async function analyze(input) {
-  const scanRoot = import_node_path8.default.resolve(input.path);
+  const scanRoot = await canonicalScanRoot(input.path);
   const loadedConfig = await loadConfig(scanRoot, input.config);
+  return analyzeWithLoadedConfig(input, loadedConfig, scanRoot);
+}
+async function analyzeWithLoadedConfig(input, loadedConfig, canonicalRoot) {
+  const scanRoot = canonicalRoot ?? await canonicalScanRoot(input.path);
   const config = loadedConfig.config;
   const configuredProject = input.project || config?.project?.path;
   const requireKicad = input.requireKicad || config?.project?.require_kicad_cli === true;
   const discovery = await discoverProjects(scanRoot, configuredProject);
-  const kicad = await runKicadChecks(discovery.projects, input.kicadCli);
+  const kicad = await runKicadChecks(discovery.projects, input.kicadCli, config?.kicad);
   const findings = [];
   for (const error2 of loadedConfig.errors) {
     findings.push(makeFinding({
@@ -102593,7 +102938,7 @@ async function analyze(input) {
     projects: normalizedProjects,
     kicad: {
       found: kicad.cli.found,
-      path: kicad.cli.found ? "kicad-cli" : void 0,
+      path: kicad.cli.path,
       version: kicad.cli.version,
       ercStatus: kicad.cli.ercStatus,
       drcStatus: kicad.cli.drcStatus
@@ -102603,6 +102948,14 @@ async function analyze(input) {
     findings: normalizedFindings,
     exportPlan: input.exportPlan ? exportPlan(config) : void 0
   };
+}
+async function canonicalScanRoot(inputPath) {
+  const resolved = import_node_path8.default.resolve(inputPath);
+  try {
+    return await import_promises8.default.realpath(resolved);
+  } catch {
+    return resolved;
+  }
 }
 function shouldFail(report, requireKicad = false) {
   if (requireKicad && !report.kicad.found) {
@@ -102764,19 +103117,19 @@ async function main() {
   const markdownPath = import_node_path9.default.join(resultsDir, "boardguard.md");
   const writtenFiles = [];
   if (booleanActionInput("json")) {
-    await import_promises7.default.writeFile(jsonPath, formatJson(report), "utf8");
+    await import_promises9.default.writeFile(jsonPath, formatJson(report), "utf8");
     writtenFiles.push(jsonPath);
   }
   if (booleanActionInput("sarif")) {
-    await import_promises7.default.writeFile(sarifPath, formatSarif(report), "utf8");
+    await import_promises9.default.writeFile(sarifPath, formatSarif(report), "utf8");
     writtenFiles.push(sarifPath);
   }
   if (booleanActionInput("markdown")) {
-    await import_promises7.default.writeFile(markdownPath, formatJobSummary(report), "utf8");
+    await import_promises9.default.writeFile(markdownPath, formatJobSummary(report), "utf8");
     writtenFiles.push(markdownPath);
   }
   if (process.env.GITHUB_STEP_SUMMARY) {
-    await import_promises7.default.appendFile(process.env.GITHUB_STEP_SUMMARY, formatJobSummary(report), "utf8");
+    await import_promises9.default.appendFile(process.env.GITHUB_STEP_SUMMARY, formatJobSummary(report), "utf8");
   }
   setOutput("findings", String(report.counts.total));
   setOutput("critical", String(report.counts.critical));
@@ -102827,7 +103180,7 @@ async function uploadSarif(workspace, sarifPath) {
   }
   const [owner, repo] = repository.split("/");
   const octokit = getOctokit(token);
-  const sarif = await import_promises7.default.readFile(sarifPath);
+  const sarif = await import_promises9.default.readFile(sarifPath);
   const gzipped = import_node_zlib2.default.gzipSync(sarif).toString("base64");
   await octokit.request("POST /repos/{owner}/{repo}/code-scanning/sarifs", {
     owner,

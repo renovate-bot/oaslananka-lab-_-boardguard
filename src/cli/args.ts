@@ -5,10 +5,15 @@ export interface ParsedCli {
   options: AnalyzeOptions;
   format: ReportFormat;
   outputs: {
-    json?: string;
-    sarif?: string;
-    markdown?: string;
+    json?: ReportOutputFlag;
+    sarif?: ReportOutputFlag;
+    markdown?: ReportOutputFlag;
   };
+}
+
+export interface ReportOutputFlag {
+  requested: boolean;
+  path?: string;
 }
 
 export function parseArgs(argv: string[], cwd: string): ParsedCli {
@@ -39,8 +44,17 @@ export function parseArgs(argv: string[], cwd: string): ParsedCli {
       positionalPath = arg;
       continue;
     }
-    const key = arg.slice(2);
+    const rawKey = arg.slice(2);
+    const equalsIndex = rawKey.indexOf("=");
+    const key = equalsIndex === -1 ? rawKey : rawKey.slice(0, equalsIndex);
+    const inlineValue = equalsIndex === -1 ? undefined : rawKey.slice(equalsIndex + 1);
     const readValue = (): string => {
+      if (inlineValue !== undefined) {
+        if (inlineValue === "") {
+          throw new Error(`Missing value for --${key}`);
+        }
+        return inlineValue;
+      }
       const value = rest[i + 1];
       if (!value || value.startsWith("--")) {
         throw new Error(`Missing value for --${key}`);
@@ -61,18 +75,21 @@ export function parseArgs(argv: string[], cwd: string): ParsedCli {
       }
       format = value as ReportFormat;
     } else if (key === "sarif") {
-      outputs.sarif = readOptionalPath(rest, i);
-      if (outputs.sarif) {
+      const value = readOptionalPath(rest, i, inlineValue, "sarif");
+      outputs.sarif = value ? { requested: true, path: value } : { requested: true };
+      if (value && inlineValue === undefined) {
         i += 1;
       }
     } else if (key === "json") {
-      outputs.json = readOptionalPath(rest, i);
-      if (outputs.json) {
+      const value = readOptionalPath(rest, i, inlineValue, "json");
+      outputs.json = value ? { requested: true, path: value } : { requested: true };
+      if (value && inlineValue === undefined) {
         i += 1;
       }
     } else if (key === "markdown") {
-      outputs.markdown = readOptionalPath(rest, i);
-      if (outputs.markdown) {
+      const value = readOptionalPath(rest, i, inlineValue, "markdown");
+      outputs.markdown = value ? { requested: true, path: value } : { requested: true };
+      if (value && inlineValue === undefined) {
         i += 1;
       }
     } else if (key === "mode") {
@@ -115,9 +132,26 @@ function defaultParsed(command: ParsedCli["command"], cwd: string): ParsedCli {
   };
 }
 
-function readOptionalPath(args: string[], index: number): string | undefined {
+function readOptionalPath(args: string[], index: number, inlineValue: string | undefined, format: ReportFormat): string | undefined {
+  if (inlineValue !== undefined) {
+    if (inlineValue === "") {
+      throw new Error("Report output path cannot be empty");
+    }
+    return inlineValue;
+  }
   const next = args[index + 1];
-  return next && !next.startsWith("--") ? next : undefined;
+  return next && !next.startsWith("--") && hasReportExtension(next, format) ? next : undefined;
+}
+
+function hasReportExtension(value: string, format: ReportFormat): boolean {
+  const lowered = value.toLowerCase();
+  if (format === "json") {
+    return lowered.endsWith(".json");
+  }
+  if (format === "sarif") {
+    return lowered.endsWith(".sarif") || lowered.endsWith(".sarif.json");
+  }
+  return lowered.endsWith(".md") || lowered.endsWith(".markdown");
 }
 
 function parseBoolean(value: string, name: string): boolean {

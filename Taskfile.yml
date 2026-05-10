@@ -3,55 +3,59 @@ version: "3"
 tasks:
   format:
     cmds:
-      - pnpm run format
+      - corepack pnpm run format
+  format-check:
+    cmds:
+      - corepack pnpm run format:check
   lint:
     cmds:
-      - pnpm run lint
+      - corepack pnpm run lint
   typecheck:
     cmds:
-      - pnpm run typecheck
+      - corepack pnpm run typecheck
   test:
     cmds:
-      - pnpm test
+      - corepack pnpm test
   security:
     cmds:
-      - pnpm run security
+      - corepack pnpm run security
+      - corepack pnpm audit --audit-level moderate
   build:
     cmds:
-      - pnpm run build
-      - pnpm run action:build
+      - corepack pnpm run build
+      - corepack pnpm run action:build
   action:build:
     cmds:
-      - pnpm run action:build
+      - corepack pnpm run action:build
   action:smoke:
     cmds:
-      - pnpm run action:smoke
+      - corepack pnpm run action:smoke
   cli:smoke:
     cmds:
-      - pnpm run cli:smoke
+      - corepack pnpm run cli:smoke
   pack:check:
     cmds:
-      - pnpm run pack:check
+      - corepack pnpm run pack:check
   fixtures:
     cmds:
-      - pnpm run fixtures
+      - corepack pnpm run fixtures
   scan:fixtures:
     cmds:
-      - pnpm run scan:fixtures
+      - corepack pnpm run scan:fixtures
   release:dry-run:
     cmds:
-      - pnpm run release:dry-run
+      - corepack pnpm run release:dry-run
   ci:
     cmds:
-      - pnpm run format:check
-      - pnpm run lint
-      - pnpm run typecheck
-      - pnpm run build
-      - pnpm test
-      - pnpm run action:build
-      - pnpm run pack:check
-      - pnpm run cli:smoke
-      - pnpm run action:smoke
-      - pnpm run scan:fixtures
-      - pnpm run security
-      - pnpm run release:dry-run
+      - corepack pnpm run format:check
+      - corepack pnpm run lint
+      - corepack pnpm run typecheck
+      - corepack pnpm run build
+      - corepack pnpm test
+      - corepack pnpm run action:build
+      - corepack pnpm run pack:check
+      - corepack pnpm run cli:smoke
+      - corepack pnpm run action:smoke
+      - corepack pnpm run scan:fixtures
+      - corepack pnpm run security
+      - corepack pnpm run release:dry-run

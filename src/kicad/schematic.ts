@@ -7,26 +7,29 @@ export interface ParsedSchematic {
   reason?: string;
   components: ComponentRecord[];
   netLabels: string[];
+  sheetFiles: string[];
 }
 
 export async function parseSchematic(file: string): Promise<ParsedSchematic> {
   try {
     const text = await readTextFile(file);
     if (text.trim().length < 32 || !text.includes("(kicad_sch")) {
-      return { valid: false, reason: "schematic file is suspiciously small or missing kicad_sch root", components: [], netLabels: [] };
+      return { valid: false, reason: "schematic file is suspiciously small or missing kicad_sch root", components: [], netLabels: [], sheetFiles: [] };
     }
     parseSExpression(text);
     return {
       valid: true,
       components: extractComponents(text, file),
-      netLabels: extractNetLabels(text).sort()
+      netLabels: extractNetLabels(text).sort(),
+      sheetFiles: extractSheetFiles(text).sort()
     };
   } catch (error) {
     return {
       valid: false,
       reason: error instanceof Error ? error.message : "schematic file could not be parsed",
       components: [],
-      netLabels: []
+      netLabels: [],
+      sheetFiles: []
     };
   }
 }
@@ -82,6 +85,18 @@ function extractNetLabels(text: string): string[] {
     labels.add(match[1]);
   }
   return [...labels];
+}
+
+export function extractSheetFiles(text: string): string[] {
+  const sheets = new Set<string>();
+  const propertyPattern = /\(property\s+"Sheet file"\s+"([^"]+)"/g;
+  for (const match of text.matchAll(propertyPattern)) {
+    const value = match[1].trim();
+    if (value !== "") {
+      sheets.add(value);
+    }
+  }
+  return [...sheets];
 }
 
 function balancedSlice(text: string, start: number): string | undefined {

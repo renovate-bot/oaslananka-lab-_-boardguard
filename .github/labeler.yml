@@ -1,0 +1,37 @@
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ".github/workflows/**"
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**"
+          - "*.md"
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "pnpm-lock.yaml"
+          - "pnpm-workspace.yaml"
+source:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**"
+          - "action.yml"
+          - "boardguard.schema.json"
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "tests/**"
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "SECURITY.md"
+          - ".pre-commit-config.yaml"
+          - ".gitleaks.toml"
+release:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "release-please-config.json"
+          - ".release-please-manifest.json"
+          - "CHANGELOG.md"
+          - ".github/workflows/release.yml"
