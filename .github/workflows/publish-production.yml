@@ -153,8 +153,9 @@ jobs:
           status="$?"
           set -e
           if [[ "${status}" -ne 0 ]]; then
-            if grep -Eiq "(already exists|cannot publish over|previously published)" "${publish_log}"; then
+            if grep -Eiq "(already exists|cannot publish over|previously published|forbidden.*pre-existing version|cannot modify pre-existing version)" "${publish_log}"; then
               echo "NPM_PACKAGE_VERSION_ALREADY_PUBLISHED"
+              cat "${publish_log}"
               exit 0
             fi
             if [[ -z "${token}" ]]; then
@@ -166,3 +167,4 @@ jobs:
             cat "${publish_log}" >&2
             exit "${status}"
           fi
+          cat "${publish_log}"
