@@ -66,7 +66,6 @@ jobs:
         with:
           node-version: 24.15.0
           registry-url: https://registry.npmjs.org
-          package-manager-cache: false
       - name: Install and verify package
         run: |
           set -euo pipefail
@@ -82,7 +81,7 @@ jobs:
           mkdir -p publish-artifact
           npm pack --pack-destination publish-artifact
       - name: Upload package artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: npm-package
           path: publish-artifact/*.tgz
@@ -98,7 +97,7 @@ jobs:
       id-token: write
     steps:
       - name: Download package artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: npm-package
           path: publish-artifact
@@ -107,7 +106,6 @@ jobs:
         with:
           node-version: 24.15.0
           registry-url: https://registry.npmjs.org
-          package-manager-cache: false
       - name: Use npm for trusted publishing
         run: npm install -g npm@11.6.2
       - name: Publish to npm
